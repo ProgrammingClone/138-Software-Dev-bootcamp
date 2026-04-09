@@ -5,6 +5,10 @@ function runForLoop() {
         console.log(`Number: ${i}`);
     }
 
+    for (let i = 0; i < 5; ++i) {
+        console.log(` Number: ${i}`);
+    }
+
     const fruits = ['apple', 'banana', 'orange'];
     console.log("\nFruits Array:");
     for (let i = 0; i < fruits.length; i++) {

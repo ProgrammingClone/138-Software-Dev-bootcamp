@@ -12,45 +12,58 @@
   <script>
     // TODO 1: Declare variables using var, let, and const
     // Declare a variable named 'x' using 'var' and assign it the value 10
+    var x = 10;
 
     // Declare a variable named 'y' using 'let' and assign it the value 5
-
+    let y = 5;
     // Declare a constant named 'z' using 'const' and assign it the value 20
-
+    const z = 20;
     // TODO 2: Perform arithmetic operations
     // Add 'x' and 'y' and store the result in a new variable 'sum'
-
+    let sum = x + y;
     // Subtract 'y' from 'x' and store the result in a new variable 'difference'
-
+    let difference = x - y;
     // Multiply 'x' and 'z' and store the result in a new variable 'product'
-
+    let product = x * z;
     // Divide 'z' by 'y' and store the result in a new variable 'quotient'
+    let quotient = z / y;
 
     // TODO 3: Use string methods
     // Declare two string variables 'greeting' with value "Hello" and 'name' with value "Student"
-
+    let greeting = "Hello";
+    let name = "Student";
     // Concatenate 'greeting' and 'name' and store the result in a new variable 'message'
+    let message = greeting + " " + name;
 
     // Find and log the length of the 'message' string
+    let msgLength = message.length; 
+    console.log(msgLength);
 
     // Convert 'greeting' to uppercase and log the result
-
+    let upperGreeting = greeting.toUpperCase();
+    console.log(upperGreeting); 
     // Convert 'name' to lowercase and log the result
-
+    console.log(name.toLowerCase());
     // TODO 4: Use comparison and logical operators
     // Compare if 'x' is greater than 'y' and log the result (true/false)
-
+    console.log(x > y);
     // Compare if 'x' is equal to 'z' and log the result (true/false)
+    console.log(x === z);
 
     // Use the AND (&&) operator to check if 'x' is greater than 'y' AND 'z' is greater than 'x', and log the result
+    let andResult = (x > y) && (z > x);
+    console.log(andResult);
 
     // Use the OR (||) operator to check if 'x' is less than 'y' OR 'z' is greater than 'y', and log the result
-    
+    console.log(x < y || z > y);
+
     // TODO 5: Try using more string methods
     // Extract and log a substring from 'message' (first 5 characters)
-
+    let substring = message.substring(0, 5);
+    console.log(substring);
     // Replace "Student" in the 'message' with "JavaScript Learner" and log the new message
-
+    let newMessage = message.replace("Student", "JavaScript Learner");
+    console.log(newMessage);
   </script>
 
 </body>
