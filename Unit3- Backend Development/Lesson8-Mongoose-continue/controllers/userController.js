@@ -16,7 +16,7 @@ const getUsers = async (req, res) => {
   try {
     // Extract query parameters from the request URL. These come from req.query
     // Example query: ?name=john&age=30&sortBy=age&order=desc&page=2&limit=5
-   
+
     const {
       name,
       age,
@@ -39,16 +39,14 @@ const getUsers = async (req, res) => {
     const sortOption = {};
     sortOption[sortBy] = sortDirection;
 
-    // Query the database with the constructed filter and options:
-    // - sort(sortOption) orders the results
-    // - skip(...) implements pagination offset
-    // - limit(...) caps the number of returned documents
-    // Note: req.query values are strings when provided via URL, so we ensure
-    // numeric behavior by converting `limit` to a Number where needed.
-    const users = await User.find(filter)
+    const query = User.find(filter)
       .sort(sortOption)
       .skip((page - 1) * limit)
       .limit(Number(limit));
+    if (req.query.includePosts === "true") {
+      query.populate("posts");
+    }
+    const users = await query.exec();
 
     // Send the found users back to the client
     res.status(200).json(users);

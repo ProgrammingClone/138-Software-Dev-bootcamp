@@ -21,7 +21,7 @@ const createPost = async (req, res) => {
 // Get all posts with user details
 const getPosts = async (req, res) => {
   try {
-    const posts = await Post.find().populate('user', 'name email');
+    const posts = await Post.find().populate('user', 'name email '); // exclude _id with -
     res.status(200).json(posts);
   } catch (error) {
     res.status(500).json({ error: error.message });
