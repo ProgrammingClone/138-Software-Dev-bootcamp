@@ -18,14 +18,13 @@ You will create a backend service with the following responsibilities:
   - A nested route means the note routes include the parent session ID in the path, for example `/sessions/:sessionId/notes`
 - Add support for searching and filtering session data
 - Implement validation, error handling, and basic request logging
-- Research and implement one advanced Mongoose or API pattern not shown in the main lessons
 
 ## Requirements
 
 ### 1. Project setup
 
 - Initialize a new Node.js project with `npm init -y`
-- Install required dependencies: `express`, `mongoose`, `dotenv`, and any other helpers you choose
+- Install required dependencies: `express`, `mongoose`, `dotenv`, `nodemon` and any other helpers you choose
 - Create an entrypoint file such as `server.js` or `app.js`
 - Use `.env` to store database URI and port settings
 
@@ -201,3 +200,7 @@ Response:
 - You do not need to build a frontend for this lab.
 - Focus on clear API design, maintainable code, and good error responses.
 - Write code as if this API will be used by a frontend app
+
+## Resources
+
+- Mongoose documentation: https://mongoosejs.com/
