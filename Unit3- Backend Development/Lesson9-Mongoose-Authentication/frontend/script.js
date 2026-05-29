@@ -3,6 +3,7 @@
 const API_BASE = "http://localhost:3000/api/auth";
 let isLoggedIn = false;
 
+// Html elements 
 const messageEl = document.getElementById("message");
 const profileOutput = document.getElementById("profileOutput");
 const registerForm = document.getElementById("registerForm");
@@ -10,6 +11,7 @@ const loginForm = document.getElementById("loginForm");
 const profileButton = document.getElementById("profileButton");
 const logoutButton = document.getElementById("logoutButton");
 
+// event listeners
 registerForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const name = document.getElementById("registerName").value.trim();

@@ -5,7 +5,7 @@ require('dotenv').config();
 // Cookie options control how the browser stores and sends the auth cookie.
 // The `accessToken` cookie is used to keep the user logged in without sending the JWT in the request body or headers manually.
 
-const isProduction = process.env.NODE_ENV === "production";
+const isDevelopment = process.env.NODE_ENV === "development";
 
 const COOKIE_OPTIONS = {
   // Prevent browser JavaScript from reading the cookie.
@@ -28,7 +28,7 @@ const COOKIE_OPTIONS = {
   //
   // During local development:
   // We usually use localhost with HTTP, so secure is often false.
-  secure: isProduction,
+  secure: isDevelopment,
 
    // Controls whether the browser sends the cookie
   // when requests come from OTHER websites.
@@ -43,7 +43,7 @@ const COOKIE_OPTIONS = {
   // using your logged-in cookies.
   //
   // sameSite helps prevent that.
-  sameSite: isProduction ? "none" : "lax",
+  sameSite: isDevelopment ? "none" : "lax",
   // "lax"
   // ------
   // Cookie is sent for:

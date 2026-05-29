@@ -14,7 +14,7 @@ const UserSchema = new mongoose.Schema(
     age: Number,
     passwordHash: { type: String, required: true },
   },
-  { timestamps: true, id: false },
+  { timestamps: true, id: false },    
 );
 
 // Set a virtual password property so the consumer can assign plaintext passwords.
@@ -29,9 +29,9 @@ UserSchema.virtual("password").set(function (password) {
 // Mongoose hooks are middleware attached to model lifecycle events.
 // Here, the `pre('save')` hook hashes the password before the document is stored.
 
+// Schema.pre("operation", function);
 UserSchema.pre("save", async function () {
   if (!this.isModified("passwordHash")) return;
-
   const raw = this.passwordHash;
   this.passwordHash = await bcrypt.hash(raw, 10);
 });
