@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 1: AI Fundamentals</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f6f2;
+    --surface: #ffffff;
+    --surface2: #f0ede6;
+    --border: #d8d4c8;
+    --text: #1a1916;
+    --text2: #5a5750;
+    --text3: #8a8780;
+    --accent: #1a3a5c;
+    --accent2: #c94a1a;
+    --green: #1a5c35;
+    --green-bg: #eaf3e6;
+    --amber: #7a4a0a;
+    --amber-bg: #fdf3e0;
+    --blue-bg: #e6f0fa;
+    --blue: #1a3a6c;
+    --red-bg: #faeaea;
+    --red: #7a1a1a;
+    --pencil-up: #0a4a2a;
+    --pencil-up-bg: #e4f2e8;
+    --pencil-down: #3a1a6a;
+    --pencil-down-bg: #ede8f8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .page-header {
+    background: var(--accent);
+    color: white;
+    padding: 48px 48px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .page-header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    border: 40px solid rgba(255,255,255,0.06);
+  }
+
+  .page-header::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: 30%;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    border: 50px solid rgba(255,255,255,0.04);
+  }
+
+  .lesson-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 10px;
+  }
+
+  .page-header h1 {
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1.2;
+    max-width: 600px;
+    margin-bottom: 20px;
+  }
+
+  .meta-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+
+  .meta-chip {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .nav-pills {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 48px;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .nav-pill {
+    padding: 14px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .nav-pill:hover { color: var(--text); }
+  .nav-pill.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 48px 80px;
+  }
+
+  .section {
+    margin-bottom: 56px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent2);
+    background: var(--red-bg);
+    border: 1px solid #e8c0b0;
+    border-radius: 4px;
+    padding: 4px 8px;
+    margin-top: 3px;
+    white-space: nowrap;
+  }
+
+  .section-header h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .time-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    font-weight: 400;
+    margin-top: 4px;
+  }
+
+  .objectives-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .obj-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .obj-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--blue-bg);
+    border-radius: 3px;
+    padding: 2px 6px;
+    margin-top: 1px;
+    flex-shrink: 0;
+  }
+
+  .obj-card p { font-size: 13px; line-height: 1.5; color: var(--text2); }
+
+  .callout {
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 20px 0;
+    border-left: 3px solid;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .callout.pencils-down {
+    background: var(--pencil-down-bg);
+    border-color: var(--pencil-down);
+    color: var(--pencil-down);
+  }
+
+  .callout.pencils-up {
+    background: var(--pencil-up-bg);
+    border-color: var(--pencil-up);
+    color: var(--pencil-up);
+  }
+
+  .callout.note {
+    background: var(--amber-bg);
+    border-color: #c0800a;
+    color: var(--amber);
+  }
+
+  .callout.tip {
+    background: var(--blue-bg);
+    border-color: #1a5a9a;
+    color: var(--blue);
+  }
+
+  .callout.warn {
+    background: var(--red-bg);
+    border-color: #c04040;
+    color: var(--red);
+  }
+
+  .callout-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    opacity: 0.75;
+  }
+
+  h3 {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 28px 0 12px;
+  }
+
+  h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text2);
+    margin: 20px 0 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  p { margin-bottom: 12px; color: var(--text2); }
+  p strong { color: var(--text); font-weight: 600; }
+
+  .diagram-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px;
+    margin: 20px 0;
+  }
+
+  .diagram-box h4 { margin-top: 0; }
+
+  /* Concentric circles diagram */
+  .circles-diagram {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 0;
+  }
+
+  .circle-wrap {
+    position: relative;
+    width: 420px;
+    height: 420px;
+  }
+
+  .circle {
+    position: absolute;
+    border-radius: 50%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    border: 1.5px solid;
+  }
+
+  .circle-label {
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 10px 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .c1 { inset: 0; background: #e8f0f8; border-color: #4a7ab0; }
+  .c1 .circle-label { color: #1a3a6c; }
+  .c2 { inset: 40px; background: #e6f3ea; border-color: #3a8a5a; }
+  .c2 .circle-label { color: #1a5030; }
+  .c3 { inset: 80px; background: #f8f0e8; border-color: #c07030; }
+  .c3 .circle-label { color: #7a3a10; }
+  .c4 { inset: 120px; background: #f0e8f8; border-color: #8050b0; }
+  .c4 .circle-label { color: #4a2070; }
+  .c5 { inset: 160px; background: #fce8e8; border-color: #c04040; }
+  .c5 .circle-label { color: #7a1010; display: flex; align-items: center; justify-content: center; padding: 0; text-align: center; font-size: 10px; width: 100%; }
+
+  /* Perceptron diagram */
+  .perceptron-diagram {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+  }
+
+  /* Code / formula blocks */
+  .formula {
+    background: #1a1a2e;
+    color: #a8d8a8;
+    border-radius: 6px;
+    padding: 14px 18px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    margin: 14px 0;
+    overflow-x: auto;
+  }
+
+  /* XOR table */
+  .xor-table {
+    border-collapse: collapse;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    width: 100%;
+    margin: 14px 0;
+  }
+
+  .xor-table th {
+    background: var(--accent);
+    color: white;
+    padding: 8px 16px;
+    text-align: center;
+    font-weight: 500;
+  }
+
+  .xor-table td {
+    padding: 8px 16px;
+    text-align: center;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .xor-table tr:hover td { background: var(--surface2); }
+  .xor-fail { color: var(--accent2); font-weight: 600; }
+
+  /* Demo tool cards */
+  .demo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+    margin: 20px 0;
+  }
+
+  .demo-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .demo-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 2px 12px rgba(26,58,92,0.08);
+  }
+
+  .demo-card-header {
+    background: var(--accent);
+    color: white;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .demo-card-body {
+    padding: 14px 16px;
+  }
+
+  .demo-card-body p {
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+
+  .demo-btn {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    border-radius: 5px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    font-family: 'IBM Plex Mono', monospace;
+    transition: opacity 0.15s;
+    margin-top: 4px;
+  }
+
+  .demo-btn:hover { opacity: 0.85; }
+  .demo-btn.secondary {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+  }
+  .demo-btn.secondary:hover { background: var(--blue-bg); }
+
+  /* Iframe embed */
+  .demo-embed {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 20px 0;
+  }
+
+  .demo-embed-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .demo-embed-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .demo-embed-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .demo-embed iframe {
+    display: block;
+    width: 100%;
+    border: none;
+  }
+
+  /* Error table */
+  .error-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 14px 0;
+  }
+
+  .error-table th {
+    background: var(--surface2);
+    color: var(--text2);
+    font-weight: 600;
+    padding: 9px 14px;
+    text-align: left;
+    border: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .error-table td {
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    vertical-align: top;
+  }
+
+  .error-table tr:nth-child(even) td { background: var(--surface2); }
+
+  .code-tag {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--accent2);
+  }
+
+  /* Break card */
+  .break-card {
+    background: linear-gradient(135deg, var(--accent) 0%, #2a4a7c 100%);
+    color: white;
+    border-radius: 10px;
+    padding: 20px 28px;
+    margin: 32px 0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .break-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+  }
+
+  .break-card h3 { color: white; font-size: 16px; margin: 0 0 4px; }
+  .break-card p { color: rgba(255,255,255,0.8); font-size: 13px; margin: 0; }
+
+  /* Summary table */
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 14px 0;
+  }
+
+  .summary-table th {
+    background: var(--accent);
+    color: white;
+    padding: 9px 14px;
+    text-align: left;
+    font-weight: 500;
+    font-size: 12px;
+  }
+
+  .summary-table td {
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    color: var(--text2);
+  }
+
+  .summary-table tr:nth-child(even) td { background: var(--surface2); }
+
+  /* Deep learning layers visual */
+  .dl-layers {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 20px;
+    background: #1a1a2e;
+    border-radius: 8px;
+    margin: 16px 0;
+  }
+
+  .dl-layer {
+    border-radius: 4px;
+    padding: 9px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .dl-layer span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .dl-layer .layer-desc {
+    font-size: 11px;
+    opacity: 0.8;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 400;
+  }
+
+  .layer-out { background: #3a6a4a; color: #a8e8b8; }
+  .layer-h3  { background: #3a3a7a; color: #a8a8f8; }
+  .layer-h2  { background: #4a3a7a; color: #c8a8f8; }
+  .layer-h1  { background: #5a2a6a; color: #e8a8e8; }
+  .layer-in  { background: #2a4a6a; color: #a8c8f8; }
+
+  /* Analogy quote */
+  .analogy {
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    background: var(--surface);
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-style: italic;
+    color: var(--text2);
+    font-size: 14px;
+  }
+
+  .analogy strong { font-style: normal; color: var(--accent); }
+
+  /* Timeline for lesson plan */
+  .timeline {
+    position: relative;
+    padding-left: 24px;
+    margin: 20px 0;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -19px;
+    top: 18px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+  }
+
+  .timeline-time {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent2);
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+
+  .timeline-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .timeline-desc { font-size: 13px; color: var(--text2); margin: 0; }
+
+  @media (max-width: 600px) {
+    .page-header, .main { padding-left: 20px; padding-right: 20px; }
+    .nav-pills { padding-left: 20px; }
+    .circle-wrap { width: 300px; height: 300px; }
+    .c5 .circle-label { font-size: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <div class="lesson-label">Unit 4 · Foundations of AI — Lesson 1</div>
+  <h1>AI Fundamentals: From Perceptrons to Deep Learning</h1>
+  
+</header>
+
+<nav class="nav-pills">
+  <a href="#overview"    class="nav-pill active">Overview</a>
+  <a href="#section1"    class="nav-pill">1 · AI Hierarchy</a>
+  <a href="#section2"    class="nav-pill">2 · Perceptron</a>
+  <a href="#section3"    class="nav-pill">3 · Deep Learning</a>
+  <a href="#demos"       class="nav-pill">Live Demos</a>
+  <a href="#summary"     class="nav-pill">Summary</a>
+</nav>
+
+<main class="main">
+
+  <!-- OVERVIEW -->
+  <section class="section" id="overview">
+    <div class="section-header">
+      <span class="section-num">OVERVIEW</span>
+      <div>
+        <h2>Learning Objectives</h2>
+       
+      </div>
+    </div>
+
+    <div class="objectives-grid">
+      <div class="obj-card"><span class="obj-num">01</span><p>Explain the AI hierarchy: AI → ML → Neural Networks → Deep Learning → Generative AI</p></div>
+      <div class="obj-card"><span class="obj-num">02</span><p>Describe a perceptron as a simplified artificial neuron and binary classifier</p></div>
+      <div class="obj-card"><span class="obj-num">03</span><p>Explain the core limitation of single-layer perceptrons (linear separability)</p></div>
+      <div class="obj-card"><span class="obj-num">04</span><p>Describe how MLPs and hidden layers extend the perceptron to solve complex problems</p></div>
+      <div class="obj-card"><span class="obj-num">05</span><p>Understand why depth makes neural networks practical and efficient</p></div>
+    </div>
+
+  </section>
+
+  <!-- SECTION 1 -->
+  <section class="section" id="section1">
+    <div class="section-header">
+      <span class="section-num">SECTION 1</span>
+      <div>
+        <h2>The AI Hierarchy</h2>
+      </div>
+    </div>
+
+    <h3>Opening Discussion</h3>
+  
+    <div class="analogy" style="font-style:normal">
+      <strong>"What's the most exciting or surprising thing you've seen AI do recently?"</strong>
+    </div>
+   
+
+    <h3>AI Hierarchy </h3>
+
+    <div class="diagram-box">
+      <h4>Visual Aid — Concentric Circles</h4>
+      <div class="circles-diagram">
+        <div class="circle-wrap">
+          <div class="circle c1"><span class="circle-label">Artificial Intelligence</span></div>
+          <div class="circle c2"><span class="circle-label">Machine Learning</span></div>
+          <div class="circle c3"><span class="circle-label">Neural Networks</span></div>
+          <div class="circle c4"><span class="circle-label">Deep Learning</span></div>
+          <div class="circle c5"><span class="circle-label">Generative AI</span></div>
+        </div>
+      </div>
+    </div>
+
+    <p><strong>Russian nesting doll analogy</strong></p>
+
+    <table class="summary-table">
+      <thead><tr><th>Layer</th><th>Plain English</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Artificial Intelligence</strong></td><td>Any system that mimics intelligent behaviour — including simple rule-based systems from the 1950s</td><td>Chess engine, spam filter, navigation</td></tr>
+        <tr><td><strong>Machine Learning</strong></td><td>Instead of hand-programming rules, we give the system data and let it find the rules itself</td><td>Email spam detection, house price prediction</td></tr>
+        <tr><td><strong>Neural Networks</strong></td><td>A specific type of ML model loosely inspired by how brain neurons connect and fire</td><td>Image recognition, speech-to-text</td></tr>
+        <tr><td><strong>Deep Learning</strong></td><td>Neural networks with many layers — "deep" refers to depth of the network, nothing mysterious</td><td>GPT, image generation, AlphaGo</td></tr>
+        <tr><td><strong>Generative AI</strong></td><td>Deep learning focused on creating new content — text, images, video, code</td><td>ChatGPT, DALL-E, Sora, GitHub Copilot</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn">
+      <div class="callout-label">⚠️ Common Misconception</div>
+      These terms are <strong>not interchangeable</strong>. When a news article says "AI," it usually means deep learning. When someone says "machine learning," they might mean something much simpler — like a linear regression.
+    </div>
+
+  </section>
+
+  <!-- SECTION 2 -->
+  <section class="section" id="section2">
+    <div class="section-header">
+      <span class="section-num">SECTION 2</span>
+      <div>
+        <h2>The Perceptron</h2>
+       
+      </div>
+    </div>
+
+    <h3>Introducing the Perceptron</h3>
+    
+    <p>The perceptron is the <strong>simplest artificial neuron</strong> — the basic building block of all modern AI. Invented by Frank Rosenblatt in 1957–1958 at Cornell.
+
+    <h4>Biological Analogy </h4>
+    <div class="diagram-box">
+      <svg width="100%" viewBox="0 0 700 180" xmlns="http://www.w3.org/2000/svg" style="font-family:'IBM Plex Mono',monospace;font-size:12px">
+        <!-- Biological neuron -->
+        <text x="130" y="18" text-anchor="middle" fill="#5a5750" font-size="11" font-weight="600">BIOLOGICAL NEURON</text>
+        <ellipse cx="100" cy="90" rx="28" ry="22" fill="#e6f0fa" stroke="#4a7ab0" stroke-width="1.5"/>
+        <text x="100" y="94" text-anchor="middle" fill="#1a3a6c" font-size="10">Cell body</text>
+        <line x1="72" y1="78" x2="44" y2="58" stroke="#4a7ab0" stroke-width="1.5"/>
+        <line x1="72" y1="88" x2="30" y2="88" stroke="#4a7ab0" stroke-width="1.5"/>
+        <line x1="72" y1="100" x2="44" y2="118" stroke="#4a7ab0" stroke-width="1.5"/>
+        <text x="18" y="54" fill="#5a5750" font-size="10">dendrites</text>
+        <line x1="128" y1="90" x2="188" y2="90" stroke="#c04040" stroke-width="2"/>
+        <text x="156" y="108" text-anchor="middle" fill="#5a5750" font-size="10">axon →</text>
+        <circle cx="196" cy="90" r="6" fill="#c04040"/>
+
+        <!-- Arrow between -->
+        <text x="330" y="95" text-anchor="middle" fill="#8a8780" font-size="18">≈</text>
+        <text x="330" y="112" text-anchor="middle" fill="#8a8780" font-size="10">inspired by</text>
+
+        <!-- Perceptron -->
+        <text x="540" y="18" text-anchor="middle" fill="#5a5750" font-size="11" font-weight="600">PERCEPTRON</text>
+        <line x1="420" y1="62" x2="490" y2="88" stroke="#4a7ab0" stroke-width="1.5" marker-end="url(#arrowS2)"/>
+        <line x1="420" y1="90" x2="490" y2="90" stroke="#4a7ab0" stroke-width="1.5" marker-end="url(#arrowS2)"/>
+        <line x1="420" y1="118" x2="490" y2="92" stroke="#4a7ab0" stroke-width="1.5" marker-end="url(#arrowS2)"/>
+        <text x="408" y="62" text-anchor="end" fill="#5a5750" font-size="10">x₁ × w₁</text>
+        <text x="408" y="90" text-anchor="end" fill="#5a5750" font-size="10">x₂ × w₂</text>
+        <text x="408" y="118" text-anchor="end" fill="#5a5750" font-size="10">x₃ × w₃</text>
+        <rect x="490" y="72" width="50" height="36" rx="6" fill="#f0e8f8" stroke="#8050b0" stroke-width="1.5"/>
+        <text x="515" y="94" text-anchor="middle" fill="#4a2070" font-size="10">Sum</text>
+        <line x1="540" y1="90" x2="580" y2="90" stroke="#4a7ab0" stroke-width="1.5" marker-end="url(#arrowS2)"/>
+        <rect x="580" y="72" width="60" height="36" rx="6" fill="#e8f0e8" stroke="#3a8a5a" stroke-width="1.5"/>
+        <text x="610" y="90" text-anchor="middle" fill="#1a5030" font-size="10">0 or 1</text>
+        <text x="610" y="104" text-anchor="middle" fill="#3a7a5a" font-size="9">threshold</text>
+        <defs>
+          <marker id="arrowS2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="#4a7ab0" stroke-width="1.5" stroke-linecap="round"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+
+    <p>The formula is simple — just a <strong>weighted sum followed by a decision</strong>:</p>
+    <div class="formula">output = 1  if (w₁·x₁ + w₂·x₂ + w₃·x₃ + b) > 0
+output = 0  otherwise
+
+Where:  x = inputs,  w = weights (learned),  b = bias</div>
+
+
+    <h3>The Perceptron as a Binary Classifier </h3>
+    
+
+    <p>A perceptron answers exactly one question: <strong>which of two categories does this belong to?</strong></p>
+    <p>Examples: spam or not spam /  cat or not cat. This is called <strong>binary classification</strong>.</p>
+
+    <div class="demo-embed">
+      <div class="demo-embed-header">
+        <span class="demo-embed-title">🔬 Rosenblatt Perceptron — Live Demo</span>
+        <div class="demo-embed-controls">
+          <a href="https://phiresky.github.io/kogsys-demos/neural-network-demo/?preset=Rosenblatt%20Perceptron" target="_blank" class="demo-btn secondary">Open Full Screen ↗</a>
+        </div>
+      </div>
+      <iframe src="https://phiresky.github.io/kogsys-demos/neural-network-demo/?preset=Rosenblatt%20Perceptron" height="420" loading="lazy" title="Rosenblatt Perceptron Demo"></iframe>
+    </div>
+
+    <div class="callout tip">
+
+      <p style="color:var(--blue);margin-bottom:4px">"The <strong>line</strong> is the decision boundary — the perceptron's answer to 'where do I draw the line between the two groups?'"</p>
+      <p style="color:var(--blue);margin-bottom:4px">"Watch what happens when I click Train — the line adjusts every time the perceptron makes a mistake. That's learning."</p>
+      <p style="color:var(--blue);margin:0">"The perceptron has a proven training algorithm: if a correct set of weights exists, it will find them. Rosenblatt proved this in the 1950s."</p>
+    </div>
+
+    <h3>The Core Limitation</h3>
+
+    <p>A perceptron can only draw a <strong>straight line</strong>. What if the data cannot be separated by a straight line?</p>
+
+    <h4>The XOR Problem</h4>
+    <table class="xor-table">
+      <thead><tr><th>Input A</th><th>Input B</th><th>Output</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td>0</td><td>1</td><td class="xor-fail">1</td></tr>
+        <tr><td>1</td><td>0</td><td class="xor-fail">1</td></tr>
+        <tr><td>1</td><td>1</td><td>0</td></tr>
+      </tbody>
+    </table>
+
+    <p>The two "1" outputs are in opposite corners of the grid. There is <strong>no single straight line</strong> that can separate them. Watch the perceptron fail — it keeps trying and never converges.</p>
+
+    <div class="demo-embed">
+      <div class="demo-embed-header">
+        <span class="demo-embed-title">❌ XOR — The Perceptron Fails</span>
+        <div class="demo-embed-controls">
+          <a href="https://phiresky.github.io/kogsys-demos/neural-network-demo/?preset=Rosenblatt%20Perceptron%20-%20XOR" target="_blank" class="demo-btn secondary">Open Full Screen ↗</a>
+        </div>
+      </div>
+      <iframe src="https://phiresky.github.io/kogsys-demos/neural-network-demo/?preset=Rosenblatt%20Perceptron%20-%20XOR" height="420" loading="lazy" title="XOR Failure Demo"></iframe>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-label">🎯 Key Insight to Land</div>
+      This isn't a bug — it's a fundamental limitation of the architecture. A single layer of computation can only represent <strong>linear decision boundaries</strong>. Most real-world problems are NOT linearly separable. This is why we need more.
+    </div>
+
+    <div class="analogy">
+      <strong>Analogy:</strong> Imagine trying to draw a single straight line through a city map to separate all the coffee shops from all the restaurants. You can't — they're scattered everywhere. You'd need a much more complex boundary.
+    </div>
+
+  </section>
+
+  <!-- BREAK -->
+  <div class="break-card">
+    <div class="break-icon">☕</div>
+    <div>
+      <h3>10-Minute Break</h3>
+     
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <section class="section" id="section3">
+    <div class="section-header">
+      <span class="section-num">SECTION 3</span>
+      <div>
+        <h2>MLPs, Neural Networks, and Deep Learning</h2>
+      </div>
+    </div>
+
+    <h3>From One Neuron to Many </h3>
+  
+
+    <p>The fix is simple in concept: <strong>add more layers</strong>. Multiple perceptrons working together can draw multiple lines, and those combined lines can create <strong>any shape of boundary</strong>.</p>
+
+    <div class="diagram-box">
+      <h4>Architecture — Multilayer Perceptron</h4>
+      <svg width="100%" viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg" style="font-family:'IBM Plex Mono',monospace">
+        <defs>
+          <marker id="arrMLP" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="#8a8780" stroke-width="1.5" stroke-linecap="round"/>
+          </marker>
+        </defs>
+        <!-- Column labels -->
+        <text x="100" y="20" text-anchor="middle" fill="#5a5750" font-size="11" font-weight="600">INPUT LAYER</text>
+        <text x="340" y="20" text-anchor="middle" fill="#5a5750" font-size="11" font-weight="600">HIDDEN LAYER</text>
+        <text x="580" y="20" text-anchor="middle" fill="#5a5750" font-size="11" font-weight="600">OUTPUT LAYER</text>
+        <!-- Input nodes -->
+        <circle cx="100" cy="70"  r="18" fill="#e6f0fa" stroke="#4a7ab0" stroke-width="1.5"/>
+        <circle cx="100" cy="110" r="18" fill="#e6f0fa" stroke="#4a7ab0" stroke-width="1.5"/>
+        <circle cx="100" cy="150" r="18" fill="#e6f0fa" stroke="#4a7ab0" stroke-width="1.5"/>
+        <text x="100" y="75"  text-anchor="middle" fill="#1a3a6c" font-size="10">x₁</text>
+        <text x="100" y="115" text-anchor="middle" fill="#1a3a6c" font-size="10">x₂</text>
+        <text x="100" y="155" text-anchor="middle" fill="#1a3a6c" font-size="10">x₃</text>
+        <!-- Connections input → hidden -->
+        <line x1="118" y1="70"  x2="302" y2="80"  stroke="#d8d4c8" stroke-width="0.8" marker-end="url(#arrMLP)"/>
+        <line x1="118" y1="70"  x2="302" y2="110" stroke="#d8d4c8" stroke-width="0.8" marker-end="url(#arrMLP)"/>
+        <line x1="118" y1="70"  x2="302" y2="140" stroke="#d8d4c8" stroke-width="0.8" marker-end="url(#arrMLP)"/>
+        <line x1="118" y1="110" x2="302" y2="80"  stroke="#d8d4c8" stroke-width="0.8" marker-end="url(#arrMLP)"/>
+        <line x1="118" y1="110" x2="302" y2="110" stroke="#d8d4c8" stroke-width="0.8" marker-end="url(#arrMLP)"/>
+        <line x1="118" y1="110" x2="302" y2="140" stroke="#d8d4c8" stroke-width="0.8" marker-end="url(#arrMLP)"/>
+        <line x1="118" y1="150" x2="302" y2="80"  stroke="#d8d4c8" stroke-width="0.8" marker-end="url(#arrMLP)"/>
+        <line x1="118" y1="150" x2="302" y2="110" stroke="#d8d4c8" stroke-width="0.8" marker-end="url(#arrMLP)"/>
+        <line x1="118" y1="150" x2="302" y2="140" stroke="#d8d4c8" stroke-width="0.8" marker-end="url(#arrMLP)"/>
+        <!-- Hidden nodes -->
+        <circle cx="320" cy="80"  r="18" fill="#f0e8f8" stroke="#8050b0" stroke-width="1.5"/>
+        <circle cx="320" cy="110" r="18" fill="#f0e8f8" stroke="#8050b0" stroke-width="1.5"/>
+        <circle cx="320" cy="140" r="18" fill="#f0e8f8" stroke="#8050b0" stroke-width="1.5"/>
+        <text x="320" y="85"  text-anchor="middle" fill="#4a2070" font-size="10">h₁</text>
+        <text x="320" y="115" text-anchor="middle" fill="#4a2070" font-size="10">h₂</text>
+        <text x="320" y="145" text-anchor="middle" fill="#4a2070" font-size="10">h₃</text>
+        <!-- Label "hidden" -->
+        <rect x="267" y="162" width="106" height="18" rx="3" fill="#f0e8f8" stroke="#8050b0" stroke-width="0.8"/>
+        <text x="320" y="174" text-anchor="middle" fill="#4a2070" font-size="10">"the magic happens here"</text>
+        <!-- Connections hidden → output -->
+        <line x1="338" y1="80"  x2="550" y2="110" stroke="#d8d4c8" stroke-width="0.8" marker-end="url(#arrMLP)"/>
+        <line x1="338" y1="110" x2="550" y2="110" stroke="#d8d4c8" stroke-width="0.8" marker-end="url(#arrMLP)"/>
+        <line x1="338" y1="140" x2="550" y2="110" stroke="#d8d4c8" stroke-width="0.8" marker-end="url(#arrMLP)"/>
+        <!-- Output node -->
+        <circle cx="568" cy="110" r="18" fill="#eaf3e6" stroke="#3a8a5a" stroke-width="1.5"/>
+        <text x="568" y="114" text-anchor="middle" fill="#1a5030" font-size="9">output</text>
+      </svg>
+    </div>
+
+    <table class="summary-table">
+      <thead><tr><th>Layer Type</th><th>What It Does</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Input Layer</strong></td><td>Raw data going in — pixels, numbers, text tokens. Not really a "computation" layer, just the entry point.</td></tr>
+        <tr><td><strong>Hidden Layer(s)</strong></td><td>Intermediate layers that transform the data. These are the layers that "learn features." The key innovation.</td></tr>
+        <tr><td><strong>Output Layer</strong></td><td>The final prediction. Could be a category (0/1), a probability, a number, etc.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <div class="callout-label">💡 Why "Hidden"?</div>
+      When you look at a trained model from outside, you only see inputs and outputs. The hidden layers are doing work you can't directly observe. They're "hidden" in that sense — not secret, just internal.
+    </div>
+
+    <div class="callout note">
+      <div class="callout-label">📖 Terminology</div>
+      A network with at least one hidden layer is called a <strong>Multilayer Perceptron (MLP)</strong>. The term <strong>feedforward</strong> means information flows one direction only — input → hidden → output. No loops. 
+    </div>
+
+    <h3>The Universal Approximation Theorem</h3>
+   
+
+    <p>Here's something remarkable. It's been <strong>mathematically proven</strong> that:</p>
+
+    <div class="analogy" style="font-style:normal;font-size:15px">
+      A neural network with just <strong>one hidden layer</strong> — if that layer is wide enough — can approximate <em>any</em> mathematical function to any degree of accuracy.
+    </div>
+
+    <p>In plain terms: a large enough single-hidden-layer network can learn <em>any</em> pattern in any data. This is called the <strong>Universal Approximation Theorem (UAT)</strong>.</p>
+
+    <p><strong>So why don't we just use one huge hidden layer?</strong> Because "in theory" and "in practice" are very different. A single wide layer might need millions or billions of neurons for complex problems. It becomes extremely hard to train — the math gets unstable. It also overfits easily, memorising training data instead of learning the actual pattern. This is partly why AI research stalled in the 1980s–1990s: people knew neural networks <em>could</em> work; they couldn't make them <em>actually</em> work at scale.</p>
+
+    <h3>Why Depth Changes Everything </h3>
+   
+
+    <p>The breakthrough: instead of one giant layer, use <strong>many smaller layers</strong>. This is <strong>deep learning</strong> — "deep" just means many layers.</p>
+
+    <div class="dl-layers">
+      <div class="dl-layer layer-out"><span>Output layer</span><span class="layer-desc">Final prediction</span></div>
+      <div class="dl-layer layer-h3"><span>Hidden layer 4</span><span class="layer-desc">Detects full objects (faces, cars)</span></div>
+      <div class="dl-layer layer-h2"><span>Hidden layer 3</span><span class="layer-desc">Detects parts (eyes, wheels)</span></div>
+      <div class="dl-layer layer-h1"><span>Hidden layer 2</span><span class="layer-desc">Detects simple shapes (corners, curves)</span></div>
+      <div class="dl-layer layer-in"><span>Hidden layer 1</span><span class="layer-desc">Detects edges and gradients</span></div>
+      <div class="dl-layer layer-in" style="background:#1a2a3a"><span>Input layer</span><span class="layer-desc">Raw pixels</span></div>
+    </div>
+
+    <p>Each layer <strong>builds on what the previous layer learned</strong>. This hierarchical structure is enormously efficient — a 10-layer network of 100 neurons each dramatically outperforms a 1-layer network of 1000 neurons.</p>
+
+    <p>Benefits of depth over width:</p>
+    <table class="summary-table">
+      <thead><tr><th>Property</th><th>Wide + Shallow</th><th>Deep + Narrow</th></tr></thead>
+      <tbody>
+        <tr><td>Training difficulty</td><td>Very hard — math gets unstable</td><td><strong>Much easier to train</strong></td></tr>
+        <tr><td>Parameter efficiency</td><td>Needs billions of neurons</td><td><strong>Far fewer total parameters</strong></td></tr>
+        <tr><td>Generalisation</td><td>Memorises training data</td><td><strong>Learns real patterns</strong></td></tr>
+        <tr><td>Feature learning</td><td>Everything at once — chaos</td><td><strong>Hierarchical — simple → complex</strong></td></tr>
+      </tbody>
+    </table>
+
+    <div class="analogy">
+      <strong>Analogy:</strong> Compare writing a 10,000-word essay in one sitting versus in stages — outline first, then summaries, then rough draft, then final. The staged approach produces better results with less total effort. Deep networks work the same way.
+    </div>
+
+    
+  </section>
+
+  <!-- DEMOS -->
+  <section class="section" id="demos">
+    <div class="section-header">
+      <span class="section-num">DEMOS</span>
+      <div>
+        <h2>Interactive Playgrounds</h2>
+       
+      </div>
+    </div>
+
+    <p>Budget your time. <strong>TensorFlow Playground</strong> is the richest — try to spend at least 20 minutes there. The others are good for quick supplementary demos.</p>
+
+    <div class="demo-embed" style="border-color:#c04040">
+      <div class="demo-embed-header" style="background:#1a3a5c">
+        <span class="demo-embed-title" style="color:white">⭐ TensorFlow Playground — Primary Demo (20 min)</span>
+        <div class="demo-embed-controls">
+          <a href="https://playground.tensorflow.org/" target="_blank" class="demo-btn" style="background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.4)">Open Full Screen ↗</a>
+        </div>
+      </div>
+      <iframe src="https://playground.tensorflow.org/" height="500" loading="lazy" title="TensorFlow Playground"></iframe>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-label">🎙️ Walkthrough Script for TensorFlow Playground</div>
+      <ol style="color:var(--blue);padding-left:18px;font-size:13px;line-height:1.9">
+        <li>Start with the default spiral dataset — point out the two interleaved spirals</li>
+        <li>Show a single hidden layer with 2 neurons: run it — watch it struggle or fail</li>
+        <li>Add more neurons to that one layer — does it help?</li>
+        <li>Now reset: add 3–4 hidden layers with fewer neurons per layer — watch the decision boundary become complex and accurate</li>
+        <li>Point to the hidden layer visualizations: "each box shows what pattern that neuron responds to"</li>
+        <li>Point to the epoch counter at top: "each epoch = one full pass through the training data"</li>
+        <li>Demonstrate overfitting: huge network + small dataset = memorizes the data, wiggly boundary</li>
+      </ol>
+    </div>
+
+    <h3>Additional Demo Tools</h3>
+    <div class="demo-grid">
+      <div class="demo-card">
+        <div class="demo-card-header">Perceptron Nonlinear Data</div>
+        <div class="demo-card-body">
+          <p>Shows the perceptron failing on curved/nonlinear data — good companion to the XOR demo.</p>
+          <a href="https://phiresky.github.io/kogsys-demos/neural-network-demo/?preset=Rosenblatt%20Perceptron%20-%20Nonlinear%20Data" target="_blank" class="demo-btn">Open Demo ↗</a>
+        </div>
+      </div>
+      <div class="demo-card">
+        <div class="demo-card-header">ConvNetJS 2D Classifier</div>
+        <div class="demo-card-body">
+          <p>Live neural network training on a scatter plot — fast and visual. Great for a 5-min explainer.</p>
+          <a href="https://cs.stanford.edu/people/karpathy/convnetjs/demo/classify2d.html" target="_blank" class="demo-btn">Open Demo ↗</a>
+        </div>
+      </div>
+      <div class="demo-card">
+        <div class="demo-card-header">UAT Streamlit Playground</div>
+        <div class="demo-card-body">
+          <p>Visualises the Universal Approximation Theorem — shows a network approximating arbitrary functions.</p>
+          <a href="https://uat-playground.streamlit.app/" target="_blank" class="demo-btn">Open Demo ↗</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUMMARY -->
+  <section class="section" id="summary">
+    <div class="section-header">
+      <span class="section-num">SUMMARY</span>
+      <div>
+        <h2>Recap & Key Concepts</h2>
+        <div class="time-badge">End of class verbal review</div>
+      </div>
+    </div>
+
+
+    <table class="error-table">
+      <thead><tr><th>Question</th><th>Answer</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>"What's the difference between AI and Machine Learning?"</td>
+          <td>ML is a subset of AI — it learns patterns from data instead of following hand-coded rules</td>
+        </tr>
+        <tr>
+          <td>"What is a perceptron?"</td>
+          <td>An artificial neuron — takes inputs, multiplies by weights, sums them, outputs 0 or 1</td>
+        </tr>
+        <tr>
+          <td>"Why can't a single perceptron solve XOR?"</td>
+          <td>It can only draw one straight line — XOR is not linearly separable</td>
+        </tr>
+        <tr>
+          <td>"What's a hidden layer?"</td>
+          <td>A layer of neurons between input and output that transforms the data into useful intermediate representations</td>
+        </tr>
+        <tr>
+          <td>"Why is deep better than wide?"</td>
+          <td>More efficient, easier to train, learns hierarchical features — simpler patterns in early layers, complex in later layers</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Quick Reference — All Key Terms</h3>
+    <table class="summary-table">
+      <thead><tr><th>Term</th><th>Plain English</th></tr></thead>
+      <tbody>
+        <tr><td><span class="code-tag">Artificial Intelligence</span></td><td>Any system that mimics intelligent behaviour</td></tr>
+        <tr><td><span class="code-tag">Machine Learning</span></td><td>AI that learns patterns from data</td></tr>
+        <tr><td><span class="code-tag">Neural Network</span></td><td>ML model loosely inspired by the brain</td></tr>
+        <tr><td><span class="code-tag">Perceptron</span></td><td>The simplest artificial neuron — a binary classifier</td></tr>
+        <tr><td><span class="code-tag">Linear Separability</span></td><td>Data that can be separated by a straight line</td></tr>
+        <tr><td><span class="code-tag">Hidden Layer</span></td><td>Intermediate layer(s) between input and output</td></tr>
+        <tr><td><span class="code-tag">MLP</span></td><td>Multi-Layer Perceptron — network with at least one hidden layer</td></tr>
+        <tr><td><span class="code-tag">Deep Learning</span></td><td>Neural networks with many hidden layers</td></tr>
+        <tr><td><span class="code-tag">Feedforward</span></td><td>Information flows one way: input → output, no loops</td></tr>
+        <tr><td><span class="code-tag">Universal Approximation</span></td><td>A wide-enough single hidden layer can approximate any function</td></tr>
+        <tr><td><span class="code-tag">Generative AI</span></td><td>Deep learning that creates new content — text, images, code</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+</main>
+
+<script>
+  const sections = document.querySelectorAll('.section');
+  const pills = document.querySelectorAll('.nav-pill');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        pills.forEach(p => {
+          p.classList.toggle('active', p.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+
+  sections.forEach(s => observer.observe(s));
+
+  pills.forEach(pill => {
+    pill.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.querySelector(pill.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>
+</body>
+</html>
