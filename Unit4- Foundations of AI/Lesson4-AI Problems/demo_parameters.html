@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>demo_parameters.js — AI Inference Parameters</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:wght@400;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0a20; --surface: #1a1535; --border: #2d2550;
+    --text: #e8e0ff; --text2: #9080c0; --green: #7eff9a;
+    --orange: #ff9040; --blue: #60b8ff; --pink: #ff70c0;
+    --yellow: #ffe060;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; min-height: 100vh; }
+
+  .header { padding: 32px 40px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; }
+  .file-badge { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px 14px; font-family: 'Fira Code', monospace; font-size: 14px; color: var(--green); }
+  .header-title { font-family: 'Nunito', sans-serif; font-size: 20px; font-weight: 800; color: var(--text); }
+  .header-sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
+
+  .main { max-width: 900px; margin: 0 auto; padding: 32px 40px 60px; }
+
+  /* TAB NAV */
+  .tabs { display: flex; gap: 4px; margin-bottom: 28px; background: var(--surface); border-radius: 12px; padding: 6px; border: 1px solid var(--border); }
+  .tab { flex: 1; padding: 10px; text-align: center; border-radius: 8px; cursor: pointer; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 14px; color: var(--text2); transition: all 0.2s; }
+  .tab:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+  .tab.active { background: var(--border); color: var(--text); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* CONTROL ROW */
+  .control-area { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px 28px; margin-bottom: 20px; }
+  .control-label { font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--text2); margin-bottom: 8px; }
+  .slider-row { display: flex; align-items: center; gap: 16px; margin-bottom: 10px; }
+  .slider-row input[type=range] { flex: 1; accent-color: var(--orange); cursor: pointer; }
+  .slider-val { font-family: 'Fira Code', monospace; font-size: 20px; font-weight: 500; color: var(--orange); min-width: 50px; text-align: right; }
+  .slider-desc { font-size: 13px; color: var(--text2); line-height: 1.5; }
+  .effect-badges { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; font-family: 'Nunito', sans-serif; border: 1px solid; }
+  .b-green { color: #7eff9a; border-color: #3a7a50; background: rgba(126,255,154,0.08); }
+  .b-yellow { color: var(--yellow); border-color: #7a7030; background: rgba(255,224,96,0.08); }
+  .b-red { color: #ff7060; border-color: #7a3028; background: rgba(255,112,96,0.08); }
+
+  /* OUTPUT AREA */
+  .output-area { background: #0a0818; border: 1px solid var(--border); border-radius: 14px; padding: 22px 26px; }
+  .output-label { font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--text2); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+  .prompt-text { font-family: 'Fira Code', monospace; font-size: 13px; color: var(--blue); padding: 10px 16px; background: rgba(96,184,255,0.07); border-radius: 8px; margin-bottom: 14px; line-height: 1.6; }
+  .response-text { font-family: 'Nunito Sans', sans-serif; font-size: 14.5px; color: var(--text); line-height: 1.8; min-height: 80px; }
+  .typing-cursor { display: inline-block; width: 2px; height: 16px; background: var(--green); vertical-align: middle; animation: blink 0.8s infinite; margin-left: 2px; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* EXPLANATION BOX */
+  .explain { background: rgba(255,144,64,0.07); border: 1px solid rgba(255,144,64,0.2); border-radius: 10px; padding: 14px 18px; margin-top: 16px; font-size: 13.5px; color: #d0a880; line-height: 1.65; }
+  .explain strong { color: var(--orange); }
+
+  /* TOKEN VIS */
+  .token-grid { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+  .tok { padding: 5px 10px; border-radius: 6px; font-family: 'Fira Code', monospace; font-size: 13px; font-weight: 500; border: 1px solid; transition: all 0.4s; }
+
+  /* PROBABILITY VIS */
+  .prob-list { margin-top: 12px; }
+  .prob-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .prob-word { font-family: 'Fira Code', monospace; font-size: 13px; color: var(--text); width: 110px; flex-shrink: 0; }
+  .prob-bar-wrap { flex: 1; height: 22px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; }
+  .prob-bar { height: 100%; border-radius: 4px; transition: width 0.6s ease; display: flex; align-items: center; padding-left: 6px; font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.7); }
+  .prob-pct { font-family: 'Fira Code', monospace; font-size: 12px; color: var(--text2); width: 40px; text-align: right; flex-shrink: 0; }
+  .prob-item.dimmed .prob-word { opacity: 0.35; }
+  .prob-item.dimmed .prob-bar { opacity: 0.2; }
+  .prob-item.dimmed .prob-pct { opacity: 0.35; }
+
+  .run-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--orange); color: #1a0a00; border: none; border-radius: 10px; padding: 11px 22px; font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800; cursor: pointer; transition: opacity 0.15s; margin-top: 16px; }
+  .run-btn:hover { opacity: 0.85; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="file-badge">demo_parameters.js</div>
+  </div>
+  <div>
+    <div class="header-title">AI Inference Parameters — Interactive Demo</div>
+    <div class="header-sub">Adjust the sliders and see exactly how each parameter changes AI behaviour</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('temperature')">🌡 Temperature</div>
+    <div class="tab" onclick="showTab('topp')">🔝 Top P</div>
+    <div class="tab" onclick="showTab('topk')">🔢 Top K</div>
+    <div class="tab" onclick="showTab('maxtokens')">📏 Max Tokens</div>
+  </div>
+
+  <!-- TEMPERATURE -->
+  <div class="tab-panel active" id="tab-temperature">
+    <div class="control-area">
+      <div class="control-label">Temperature</div>
+      <div class="slider-row">
+        <span style="font-size:13px;color:var(--text2)">Predictable</span>
+        <input type="range" id="temp-slider" min="0" max="20" value="7" step="1" oninput="updateTemperature()">
+        <span style="font-size:13px;color:var(--text2)">Creative / Wild</span>
+        <span class="slider-val" id="temp-val">0.7</span>
+      </div>
+      <div class="effect-badges" id="temp-badges"></div>
+      <div class="explain" id="temp-explain"></div>
+    </div>
+
+    <div class="output-area">
+      <div class="output-label">
+        🧠 Prompt being sent
+      </div>
+      <div class="prompt-text">Continue this sentence with one word: "The sky is"</div>
+      <div class="output-label" style="margin-top:16px">
+        📊 Next-word probabilities — which words the AI is considering
+        <span style="font-size:11px;color:var(--text2)">(words dimmed out = cut off by temperature)</span>
+      </div>
+      <div class="prob-list" id="prob-list"></div>
+      <div class="output-label" style="margin-top:16px">✏️ What the AI picks (run several times to see variation)</div>
+      <div class="response-text" id="temp-response">Press Run to see the output...</div>
+      <button class="run-btn" onclick="runTemperature()">▶ Run</button>
+    </div>
+  </div>
+
+  <!-- TOP P -->
+  <div class="tab-panel" id="tab-topp">
+    <div class="control-area">
+      <div class="control-label">Top P</div>
+      <div class="slider-row">
+        <span style="font-size:13px;color:var(--text2)">Conservative</span>
+        <input type="range" id="topp-slider" min="1" max="10" value="9" step="1" oninput="updateTopP()">
+        <span style="font-size:13px;color:var(--text2)">Varied</span>
+        <span class="slider-val" id="topp-val">0.9</span>
+      </div>
+      <div class="explain" id="topp-explain"></div>
+    </div>
+
+    <div class="output-area">
+      <div class="output-label">📊 The pool of words being considered </div>
+      <div class="prob-list" id="topp-prob-list"></div>
+      <div class="explain" style="margin-top:14px">
+        <strong>How Top P works:</strong> All words are sorted by probability, highest first. We keep adding words to the "pool" until their combined probability reaches our Top P value. Only words inside this pool can be picked. Higher Top P = larger pool = more surprising choices possible.
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP K -->
+  <div class="tab-panel" id="tab-topk">
+    <div class="control-area">
+      <div class="control-label">Top K — maximum word options</div>
+      <div class="slider-row">
+        <span style="font-size:13px;color:var(--text2)">Only top 1</span>
+        <input type="range" id="topk-slider" min="1" max="8" value="4" step="1" oninput="updateTopK()">
+        <span style="font-size:13px;color:var(--text2)">Top 8</span>
+        <span class="slider-val" id="topk-val">4</span>
+      </div>
+      <div class="explain" id="topk-explain"></div>
+    </div>
+
+    <div class="output-area">
+      <div class="output-label">📊 The word menu — which K words are allowed</div>
+      <div class="token-grid" id="topk-tokens"></div>
+      <div class="explain" style="margin-top:16px">
+        <strong>How Top K works:</strong> After ranking all words by probability, only the top K are allowed. Everything else is cut off completely, no matter how probable they are. Top K=1 means the AI <em>always</em> picks the single most likely word — totally deterministic, no variety at all.
+      </div>
+    </div>
+  </div>
+
+  <!-- MAX TOKENS -->
+  <div class="tab-panel" id="tab-maxtokens">
+    <div class="control-area">
+      <div class="control-label">Max Tokens — maximum response length</div>
+      <div class="slider-row">
+        <span style="font-size:13px;color:var(--text2)">5 tokens</span>
+        <input type="range" id="tokens-slider" min="5" max="120" value="60" step="5" oninput="updateMaxTokens()">
+        <span style="font-size:13px;color:var(--text2)">120 tokens</span>
+        <span class="slider-val" id="tokens-val">60</span>
+      </div>
+      <div class="explain" id="tokens-explain"></div>
+    </div>
+
+    <div class="output-area">
+      <div class="output-label">🧠 Prompt being sent</div>
+      <div class="prompt-text">Explain what photosynthesis is in simple terms.</div>
+      <div class="output-label" style="margin-top:16px">✏️ Response — cut off at the token limit</div>
+      <div class="response-text" id="tokens-response"></div>
+      <div class="token-grid" style="margin-top:14px" id="tokens-grid"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Shared data ──────────────────────────────────────────────────────
+const nextWordProbs = [
+  { word: "blue",      prob: 0.38, color: "#60b8ff" },
+  { word: "clear",     prob: 0.22, color: "#7eff9a" },
+  { word: "grey",      prob: 0.14, color: "#b0b0d0" },
+  { word: "filled",    prob: 0.09, color: "#ffe060" },
+  { word: "painted",   prob: 0.07, color: "#ff9040" },
+  { word: "always",    prob: 0.05, color: "#ff70c0" },
+  { word: "no",        prob: 0.03, color: "#cc4040" },
+  { word: "falling",   prob: 0.02, color: "#8860ff" },
+];
+
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`[onclick="showTab('${name}')"]`).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// ── TEMPERATURE ──────────────────────────────────────────────────────
+function updateTemperature() {
+  const raw = parseInt(document.getElementById('temp-slider').value);
+  const temp = (raw / 10).toFixed(1);
+  document.getElementById('temp-val').textContent = temp;
+
+  const f = parseFloat(temp);
+  const badges = document.getElementById('temp-badges');
+  const explain = document.getElementById('temp-explain');
+
+  if (f <= 0.3) {
+    badges.innerHTML = '<span class="badge b-green">Very safe</span><span class="badge b-green">Always picks "blue"</span><span class="badge b-yellow">Repetitive</span>';
+    explain.innerHTML = '<strong>Very low temperature:</strong> The AI always picks the single most likely word. If you ran this 100 times, you\'d get "blue" every single time. Great for factual tasks where you want a consistent, predictable answer. Bad for creative writing — everything comes out the same.';
+  } else if (f <= 0.7) {
+    badges.innerHTML = '<span class="badge b-green">Balanced</span><span class="badge b-green">Mostly "blue"</span><span class="badge b-yellow">Occasional variety</span>';
+    explain.innerHTML = '<strong>Moderate temperature (the sweet spot):</strong> The AI mostly picks likely words, but occasionally surprises you with a less obvious choice. You\'ll mostly get "blue" or "clear", with rare picks like "grey" or "painted". This is the default for most AI applications.';
+  } else if (f <= 1.2) {
+    badges.innerHTML = '<span class="badge b-yellow">Creative</span><span class="badge b-yellow">Varied outputs</span><span class="badge b-yellow">Less predictable</span>';
+    explain.innerHTML = '<strong>High temperature:</strong> The AI spreads its choices much more widely. You might get "blue", "painted", "always", or even surprising picks. Great for brainstorming and creative writing. Each run gives a different answer.';
+  } else {
+    badges.innerHTML = '<span class="badge b-red">Very wild</span><span class="badge b-red">Possibly nonsense</span><span class="badge b-yellow">Experimental only</span>';
+    explain.innerHTML = '<strong>Very high temperature:</strong> The AI is throwing almost-random darts. Even very unlikely words have a real chance of being picked. Outputs become unpredictable and often incoherent. Occasionally produces something brilliantly unexpected — but usually produces nonsense. Not useful for most tasks.';
+  }
+
+  renderProbList(f);
+}
+
+function renderProbList(temp) {
+  const list = document.getElementById('prob-list');
+  // Adjust effective probabilities based on temperature (simplified simulation)
+  let adjusted = nextWordProbs.map(w => {
+    let p = Math.pow(w.prob, 1 / Math.max(temp, 0.05));
+    return { ...w, adjProb: p };
+  });
+  const total = adjusted.reduce((s, w) => s + w.adjProb, 0);
+  adjusted = adjusted.map(w => ({ ...w, adjProb: w.adjProb / total }));
+
+  list.innerHTML = adjusted.map((w, i) => {
+    const pct = Math.round(w.adjProb * 100);
+    const dimmed = temp < 0.4 && i > 0 ? 'dimmed' : (temp < 0.7 && i > 2 ? 'dimmed' : '');
+    return `<div class="prob-item ${dimmed}">
+      <span class="prob-word">${w.word}</span>
+      <div class="prob-bar-wrap">
+        <div class="prob-bar" style="width:${pct}%;background:${w.color}">${pct > 8 ? pct + '%' : ''}</div>
+      </div>
+      <span class="prob-pct">${pct}%</span>
+    </div>`;
+  }).join('');
+}
+
+function runTemperature() {
+  const raw = parseInt(document.getElementById('temp-slider').value);
+  const temp = raw / 10;
+  let adjusted = nextWordProbs.map(w => {
+    let p = Math.pow(w.prob, 1 / Math.max(temp, 0.05));
+    return { ...w, adjProb: p };
+  });
+  const total = adjusted.reduce((s, w) => s + w.adjProb, 0);
+  adjusted = adjusted.map(w => ({ ...w, adjProb: w.adjProb / total }));
+
+  // Apply low-temp cutoff
+  if (temp < 0.4) adjusted = adjusted.slice(0, 1);
+  else if (temp < 0.7) adjusted = adjusted.slice(0, 3);
+
+  const r = Math.random();
+  let cumulative = 0;
+  let picked = adjusted[0];
+  for (const w of adjusted) {
+    cumulative += w.adjProb;
+    if (r <= cumulative) { picked = w; break; }
+  }
+
+  const completions = {
+    "blue":    "The sky is <strong>blue</strong> — as expected on a clear day.",
+    "clear":   "The sky is <strong>clear</strong> today, not a cloud in sight.",
+    "grey":    "The sky is <strong>grey</strong>, heavy with the promise of rain.",
+    "filled":  "The sky is <strong>filled</strong> with the soft glow of sunset.",
+    "painted": "The sky is <strong>painted</strong> in hues of orange and violet.",
+    "always":  "The sky is <strong>always</strong> watching, vast and indifferent.",
+    "no":      "The sky is <strong>no</strong> ordinary sky — it shimmers strangely.",
+    "falling": "The sky is <strong>falling</strong>, or so it seems to those below."
+  };
+
+  const el = document.getElementById('temp-response');
+  el.innerHTML = completions[picked.word] || `The sky is <strong>${picked.word}</strong>.`;
+}
+
+// ── TOP P ────────────────────────────────────────────────────────────
+function updateTopP() {
+  const val = parseInt(document.getElementById('topp-slider').value) / 10;
+  document.getElementById('topp-val').textContent = val.toFixed(1);
+
+  document.getElementById('topp-explain').innerHTML =
+    `<strong>Top P = ${val.toFixed(1)}:</strong> The AI adds words to its "pool" (starting with the most probable) until the pool's combined probability reaches ${(val * 100).toFixed(0)}%. Only words in this pool can be picked. ` +
+    (val <= 0.4 ? 'Very small pool — likely only 1-2 words. Very safe but boring.'
+    : val <= 0.7 ? 'Medium pool — a handful of reasonable words in play.'
+    : 'Large pool — many words in play including some surprising ones. More varied output.');
+
+  const list = document.getElementById('topp-prob-list');
+  let cumulative = 0;
+  let inPool = false;
+  list.innerHTML = nextWordProbs.map(w => {
+    cumulative += w.prob;
+    const included = cumulative <= val + 0.001;
+    const pct = Math.round(w.prob * 100);
+    return `<div class="prob-item ${included ? '' : 'dimmed'}">
+      <span class="prob-word">${included ? '✅' : '❌'} ${w.word}</span>
+      <div class="prob-bar-wrap">
+        <div class="prob-bar" style="width:${pct * 2.2}%;background:${included ? w.color : '#444'}">${pct > 8 ? pct + '%' : ''}</div>
+      </div>
+      <span class="prob-pct" style="color:${included ? 'var(--green)' : 'var(--text2)'}">${pct}%</span>
+    </div>`;
+  }).join('') + `<div style="margin-top:12px;font-size:12px;color:var(--text2)">Pool covers ${Math.round(Math.min(cumulative, val) * 100)}% of probability mass. Words marked ✅ are in the pool.</div>`;
+}
+
+// ── TOP K ────────────────────────────────────────────────────────────
+function updateTopK() {
+  const k = parseInt(document.getElementById('topk-slider').value);
+  document.getElementById('topk-val').textContent = k;
+
+  document.getElementById('topk-explain').innerHTML =
+    `<strong>Top K = ${k}:</strong> Regardless of probability, only the top ${k} word${k>1?'s':''} are allowed. ` +
+    (k === 1 ? 'K=1 means <em>always</em> pick the most likely word. Zero variety — deterministic output.'
+    : k <= 3 ? 'Very restrictive. Only the safest, most expected words can appear.'
+    : k <= 5 ? 'Moderate. A small selection of reasonable words in play.'
+    : 'Liberal. Many words are in play — the AI has plenty of choices, including surprising ones.');
+
+  const grid = document.getElementById('topk-tokens');
+  grid.innerHTML = nextWordProbs.map((w, i) => {
+    const inPool = i < k;
+    return `<span class="tok" style="
+      color:${inPool ? w.color : '#444'};
+      border-color:${inPool ? w.color + '60' : '#333'};
+      background:${inPool ? w.color + '15' : 'transparent'};
+      opacity:${inPool ? 1 : 0.3}
+    ">${w.word} <span style="font-size:11px;opacity:0.7">${Math.round(w.prob*100)}%</span></span>`;
+  }).join('');
+}
+
+// ── MAX TOKENS ───────────────────────────────────────────────────────
+const fullResponse = [
+  "Photosynthesis","is","how","plants","make","their","own","food","using","sunlight",".",
+  "Think","of","it","like","a","solar","panel","inside","the","leaf",".",
+  "The","plant","takes","in","sunlight",",","water","from","the","soil",",",
+  "and","carbon","dioxide","from","the","air",".",
+  "Using","the","energy","from","sunlight",",","it","combines","these","ingredients",
+  "to","create","glucose","—","a","type","of","sugar","that","powers","the","plant",".",
+  "The","leftover","product","?","Oxygen","—","which","gets","released","into","the","air",".",
+  "That","is","why","plants","are","so","important","for","life","on","Earth",".",
+  "They","are","constantly","pumping","fresh","oxygen","into","the","atmosphere","for","us","to","breathe","."
+];
+
+const tokenColors = ["#7eff9a","#60b8ff","#ffe060","#ff9040","#ff70c0","#b090ff","#40c0c0","#e0b060"];
+
+function updateMaxTokens() {
+  const limit = parseInt(document.getElementById('tokens-slider').value);
+  document.getElementById('tokens-val').textContent = limit;
+
+  const words = limit < 10 ? 'Very short — probably cut off mid-sentence.'
+    : limit < 30 ? 'Short — a sentence or two at most.'
+    : limit < 60 ? 'Medium — a short paragraph.'
+    : limit < 90 ? 'Long — two or three paragraphs.'
+    : 'Very long — detailed response possible.';
+
+  document.getElementById('tokens-explain').innerHTML =
+    `<strong>Max Tokens = ${limit}:</strong> The AI will stop after at most ${limit} tokens. One token ≈ ¾ of a word in English. ${limit} tokens ≈ about ${Math.round(limit * 0.75)} words. ${words} Note: if the AI naturally finishes before the limit, it stops early — this is just a ceiling.`;
+
+  const visible = fullResponse.slice(0, limit);
+  const cut = limit < fullResponse.length;
+
+  document.getElementById('tokens-response').innerHTML =
+    visible.join(' ').replace(/ ([.,!?])/g, '$1') +
+    (cut ? '<span style="color:#ff7060"> ✂️ [cut off — token limit reached]</span>' : '<span style="color:var(--green)"> ✓ [complete]</span>');
+
+  document.getElementById('tokens-grid').innerHTML =
+    fullResponse.map((w, i) => {
+      const active = i < limit;
+      const color = tokenColors[i % tokenColors.length];
+      return `<span class="tok" style="
+        color:${active ? color : '#444'};
+        border-color:${active ? color + '60' : '#2a2a2a'};
+        background:${active ? color + '12' : 'transparent'};
+        opacity:${active ? 1 : 0.25};
+        font-size:12px;padding:3px 8px
+      ">${w}</span>`;
+    }).join('');
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────
+updateTemperature();
+updateTopP();
+updateTopK();
+updateMaxTokens();
+</script>
+</body>
+</html>

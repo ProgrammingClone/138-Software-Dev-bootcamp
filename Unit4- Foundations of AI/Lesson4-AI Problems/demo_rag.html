@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>demo_rag.js — Retrieval-Augmented Generation</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:wght@400;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a; --surface: #121828; --border: #1e2e4a;
+    --text: #d0e8ff; --text2: #6080a0; --blue: #60b8ff;
+    --green: #7eff9a; --orange: #ffaa40; --purple: #c090ff; --red: #ff7060;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+
+  .header { padding: 28px 40px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px; }
+  .file-badge { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px 14px; font-family: 'Fira Code', monospace; font-size: 14px; color: var(--blue); }
+  .header-title { font-family: 'Nunito', sans-serif; font-size: 20px; font-weight: 800; color: var(--text); }
+  .header-sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
+
+  .main { max-width: 960px; margin: 0 auto; padding: 28px 40px 60px; }
+
+  .layout { display: grid; grid-template-columns: 1fr 1.6fr; gap: 24px; }
+  @media (max-width: 760px) { .layout { grid-template-columns: 1fr; } }
+
+  /* KNOWLEDGE BASE */
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .panel-header { padding: 12px 18px; border-bottom: 1px solid var(--border); font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; }
+  .ph-kb { color: var(--orange); background: rgba(255,170,64,0.06); }
+  .ph-query { color: var(--blue); background: rgba(96,184,255,0.06); }
+  .ph-retrieved { color: var(--purple); background: rgba(192,144,255,0.06); }
+  .ph-answer { color: var(--green); background: rgba(126,255,154,0.06); }
+  .panel-body { padding: 16px 18px; }
+
+  .doc-item { padding: 10px 14px; border-radius: 10px; margin-bottom: 8px; border: 1px solid var(--border); cursor: default; transition: all 0.3s; }
+  .doc-item.highlighted { border-color: var(--purple); background: rgba(192,144,255,0.1); }
+  .doc-item.top-match { border-color: var(--green); background: rgba(126,255,154,0.08); }
+  .doc-title { font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 800; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; }
+  .doc-item.highlighted .doc-title { color: var(--purple); }
+  .doc-item.top-match .doc-title { color: var(--green); }
+  .doc-text { font-size: 13px; color: var(--text2); line-height: 1.55; }
+  .doc-item.highlighted .doc-text, .doc-item.top-match .doc-text { color: var(--text); }
+  .match-score { display: inline-block; margin-top: 6px; font-family: 'Fira Code', monospace; font-size: 11px; padding: 2px 8px; border-radius: 4px; }
+  .ms-high { background: rgba(126,255,154,0.15); color: var(--green); }
+  .ms-med { background: rgba(255,170,64,0.12); color: var(--orange); }
+  .ms-low { background: rgba(255,255,255,0.05); color: var(--text2); }
+
+  /* QUERY INPUT */
+  .query-suggestions { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .q-chip { background: rgba(96,184,255,0.1); border: 1px solid rgba(96,184,255,0.25); border-radius: 20px; padding: 5px 12px; font-size: 12px; color: var(--blue); cursor: pointer; font-family: 'Nunito', sans-serif; font-weight: 700; transition: all 0.15s; }
+  .q-chip:hover { background: rgba(96,184,255,0.2); }
+  .q-chip.active { background: rgba(96,184,255,0.25); border-color: var(--blue); }
+
+  .query-input { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; color: var(--text); font-family: 'Nunito Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.15s; }
+  .query-input:focus { border-color: var(--blue); }
+
+  .run-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--blue); color: #001a2e; border: none; border-radius: 10px; padding: 11px 22px; font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800; cursor: pointer; transition: opacity 0.15s; margin-top: 12px; }
+  .run-btn:hover { opacity: 0.85; }
+
+  /* PIPELINE */
+  .pipeline { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-top: 20px; }
+  .pipeline-step { border-bottom: 1px solid var(--border); opacity: 0.35; transition: opacity 0.4s; }
+  .pipeline-step.active { opacity: 1; }
+  .pipeline-step:last-child { border-bottom: none; }
+  .ps-header { padding: 12px 18px; display: flex; align-items: center; gap: 10px; }
+  .ps-num { font-family: 'Fira Code', monospace; font-size: 11px; color: var(--text2); width: 24px; }
+  .ps-name { font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800; }
+  .ps-body { padding: 0 18px 14px; font-size: 13px; line-height: 1.65; display: none; }
+  .pipeline-step.active .ps-body { display: block; }
+
+  /* FULL PROMPT BOX */
+  .augmented-prompt { background: #070d1a; border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; font-family: 'Fira Code', monospace; font-size: 12px; line-height: 1.8; color: var(--text2); white-space: pre-wrap; margin-top: 8px; }
+  .ap-context { color: var(--purple); }
+  .ap-query { color: var(--blue); }
+  .ap-system { color: var(--orange); }
+
+  .answer-box { background: rgba(126,255,154,0.06); border: 1px solid rgba(126,255,154,0.2); border-radius: 10px; padding: 16px 20px; margin-top: 12px; font-size: 14px; line-height: 1.75; color: var(--text); }
+  .answer-box strong { color: var(--green); font-weight: 600; }
+  .answer-source { font-size: 11px; color: var(--text2); margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); }
+
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(96,184,255,0.3); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div><div class="file-badge">demo_rag.js</div></div>
+  <div>
+    <div class="header-title">RAG — Retrieval-Augmented Generation Demo</div>
+    <div class="header-sub">See exactly how an AI searches your documents and uses them to answer your question</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="layout">
+
+    <!-- LEFT: Knowledge base -->
+    <div>
+      <div class="panel">
+        <div class="panel-header ph-kb">📁 Knowledge Base — "TechCorp Internal Documents"</div>
+        <div class="panel-body" id="kb-display">
+          <!-- Docs rendered by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Query + pipeline -->
+    <div>
+      <div class="panel">
+        <div class="panel-header ph-query">❓ Ask a Question</div>
+        <div class="panel-body">
+          <div style="font-size:13px;color:var(--text2);margin-bottom:10px">Choose a sample question or type your own:</div>
+          <div class="query-suggestions" id="q-chips"></div>
+          <input class="query-input" id="query-input" placeholder="Ask anything about TechCorp...">
+          <button class="run-btn" onclick="runRAG()">▶ Run RAG Pipeline</button>
+        </div>
+      </div>
+
+      <div class="pipeline" id="pipeline">
+        <!-- Steps rendered by JS -->
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+// ── Knowledge Base ───────────────────────────────────────────────────
+const knowledgeBase = [
+  {
+    id: 'refund',
+    title: 'Returns & Refunds Policy',
+    text: 'Customers may return physical products within 30 days of purchase for a full refund. Digital products and software licences are non-refundable once downloaded. For defective physical items, we offer free replacement or full refund within 90 days regardless of the standard policy.',
+    keywords: ['refund','return','money back','policy','digital','physical','days','replace','defective']
+  },
+  {
+    id: 'shipping',
+    title: 'Shipping & Delivery',
+    text: 'Standard shipping takes 3-5 business days within the UK and 7-14 days for international orders. Express delivery (1-2 days) is available for an additional £8.99. Free standard shipping on all orders over £50. We do not currently ship to Russia or Belarus.',
+    keywords: ['shipping','delivery','days','free','express','international','uk','order','ship']
+  },
+  {
+    id: 'password',
+    title: 'Account Security Guidelines',
+    text: 'All employee passwords must be at least 14 characters, include uppercase and lowercase letters, numbers, and at least one special character. Passwords must be changed every 90 days. Multi-factor authentication (MFA) is mandatory for all accounts with admin access.',
+    keywords: ['password','security','account','mfa','authentication','characters','change','access','login']
+  },
+  {
+    id: 'leave',
+    title: 'Employee Leave Policy',
+    text: 'Full-time employees receive 25 days of annual leave per year, plus 8 public holidays. Leave must be requested through the HR portal at least 2 weeks in advance. Unused leave of up to 5 days may be carried over to the following year. Sick leave is separate and not counted against annual leave.',
+    keywords: ['leave','holiday','days off','annual','sick','hr','carry over','request','time off']
+  },
+  {
+    id: 'onboarding',
+    title: 'New Employee Onboarding',
+    text: 'New employees complete a 2-week onboarding programme. Week 1 covers company culture, systems access, and compliance training. Week 2 is role-specific training with a dedicated mentor. All new hires must complete data protection training before accessing customer data.',
+    keywords: ['onboarding','new employee','training','hire','week','mentor','data protection','start']
+  },
+  {
+    id: 'products',
+    title: 'Product Catalogue 2024',
+    text: 'Our core product lines include the ProDesk series (professional monitors, £299–£899), the QuickPack storage solutions (portable SSDs, £49–£199), and DataVault cloud subscription plans (£9.99/month personal, £29.99/month business). All products carry a 2-year warranty.',
+    keywords: ['product','monitor','storage','ssd','cloud','subscription','price','warranty','prodesk','quickpack','datavault']
+  }
+];
+
+const sampleQuestions = [
+  "What is the refund policy for digital products?",
+  "How long does standard shipping take?",
+  "What are the password requirements?",
+  "How many days of annual leave do employees get?",
+  "What happens in week 1 of onboarding?"
+];
+
+// ── Scoring ──────────────────────────────────────────────────────────
+function scoreDoc(query, doc) {
+  const qWords = query.toLowerCase().split(/\W+/);
+  let score = 0;
+  qWords.forEach(w => {
+    if (w.length < 3) return;
+    doc.keywords.forEach(kw => {
+      if (kw.includes(w) || w.includes(kw)) score += kw === w ? 3 : 1;
+    });
+    if (doc.text.toLowerCase().includes(w)) score += 1;
+    if (doc.title.toLowerCase().includes(w)) score += 2;
+  });
+  return score;
+}
+
+// ── Answers ──────────────────────────────────────────────────────────
+const answers = {
+  refund: [
+    { q: "digital", a: "Based on TechCorp's refund policy, <strong>digital products and software licences are non-refundable once downloaded</strong>. If you haven't downloaded the product yet, please contact customer support who may be able to assist. For physical products, the standard 30-day return window applies." },
+    { q: "default", a: "Based on TechCorp's returns policy, customers can return <strong>physical products within 30 days</strong> for a full refund. Digital products are non-refundable once downloaded. Defective physical items qualify for free replacement or full refund within 90 days." }
+  ],
+  shipping: [
+    { q: "standard", a: "Standard UK shipping takes <strong>3-5 business days</strong>. International orders take 7-14 days. Express 1-2 day delivery is available for £8.99. All orders over £50 qualify for free standard shipping." },
+    { q: "default", a: "TechCorp ships standard within <strong>3-5 business days</strong> in the UK, or 7-14 days internationally. Express shipping (1-2 days) costs an extra £8.99. Free shipping applies to orders over £50." }
+  ],
+  password: [
+    { q: "default", a: "Per TechCorp security guidelines, all passwords must be <strong>at least 14 characters</strong> and include uppercase, lowercase, numbers, and a special character. Passwords must be changed every 90 days. Admin accounts also require MFA (multi-factor authentication)." }
+  ],
+  leave: [
+    { q: "default", a: "Full-time employees receive <strong>25 days of annual leave</strong> plus 8 public holidays. Leave requests must be submitted via the HR portal at least 2 weeks in advance. Up to 5 days of unused leave can be carried over each year. Sick leave is tracked separately." }
+  ],
+  onboarding: [
+    { q: "default", a: "During <strong>Week 1 of onboarding</strong>, new employees cover company culture, get systems access set up, and complete compliance training. Week 2 is role-specific training with a dedicated mentor. Data protection training must be completed before accessing any customer data." }
+  ]
+};
+
+// ── Render KB ────────────────────────────────────────────────────────
+function renderKB(scores) {
+  const sorted = [...knowledgeBase].map(d => ({ ...d, score: scores ? scores[d.id] || 0 : 0 }));
+  const maxScore = Math.max(...sorted.map(d => d.score), 1);
+
+  document.getElementById('kb-display').innerHTML = sorted.map(doc => {
+    let cls = '';
+    let badge = '';
+    if (scores) {
+      const pct = doc.score / maxScore;
+      if (pct >= 0.8) { cls = 'top-match'; badge = `<span class="match-score ms-high">✅ Top match — score ${doc.score}</span>`; }
+      else if (pct >= 0.3) { cls = 'highlighted'; badge = `<span class="match-score ms-med">Partial match — score ${doc.score}</span>`; }
+      else { badge = `<span class="match-score ms-low">No match — score ${doc.score}</span>`; }
+    }
+    return `<div class="doc-item ${cls}" id="doc-${doc.id}">
+      <div class="doc-title">${doc.title}</div>
+      <div class="doc-text">${doc.text.substring(0, 90)}...</div>
+      ${badge}
+    </div>`;
+  }).join('');
+}
+
+function renderPipeline(steps) {
+  document.getElementById('pipeline').innerHTML = steps.map((s, i) =>
+    `<div class="pipeline-step ${s.active ? 'active' : ''}" id="ps-${i}">
+      <div class="ps-header">
+        <span class="ps-num">${i+1}</span>
+        <span class="ps-name" style="color:${s.color}">${s.icon} ${s.name}</span>
+        ${s.active && s.loading ? '<span class="spinner"></span>' : ''}
+      </div>
+      ${s.active && s.body ? `<div class="ps-body">${s.body}</div>` : ''}
+    </div>`
+  ).join('');
+}
+
+// ── Sample Qs ────────────────────────────────────────────────────────
+document.getElementById('q-chips').innerHTML = sampleQuestions.map((q, i) =>
+  `<span class="q-chip" onclick="selectQ(${i})">${q}</span>`
+).join('');
+
+function selectQ(i) {
+  document.querySelectorAll('.q-chip').forEach((c, j) => c.classList.toggle('active', i===j));
+  document.getElementById('query-input').value = sampleQuestions[i];
+}
+
+renderKB(null);
+renderPipeline([
+  { icon: '❓', name: 'Waiting for your question...', color: 'var(--text2)', active: false }
+]);
+
+// ── Run RAG ──────────────────────────────────────────────────────────
+async function runRAG() {
+  const query = document.getElementById('query-input').value.trim();
+  if (!query) { document.getElementById('query-input').focus(); return; }
+
+  const delay = ms => new Promise(r => setTimeout(r, ms));
+
+  // Step 1: received
+  renderPipeline([
+    { icon: '❓', name: 'Question received', color: 'var(--blue)', active: true, body: `<span style="color:var(--blue)">"${query}"</span><br><span style="font-size:12px;color:var(--text2)">Tokenising and preparing for search...</span>` },
+    { icon: '🔍', name: 'Searching knowledge base', color: 'var(--text2)', active: false },
+    { icon: '📄', name: 'Retrieving relevant chunks', color: 'var(--text2)', active: false },
+    { icon: '🔧', name: 'Building augmented prompt', color: 'var(--text2)', active: false },
+    { icon: '🤖', name: 'Generating answer', color: 'var(--text2)', active: false },
+  ]);
+  renderKB(null);
+  await delay(800);
+
+  // Step 2: searching
+  const scores = {};
+  knowledgeBase.forEach(d => scores[d.id] = scoreDoc(query, d));
+  renderKB(scores);
+  renderPipeline([
+    { icon: '❓', name: 'Question received', color: 'var(--blue)', active: true, body: `<span style="color:var(--blue)">"${query}"</span>` },
+    { icon: '🔍', name: 'Searching knowledge base', color: 'var(--orange)', active: true, loading: true, body: `Comparing your question against all ${knowledgeBase.length} documents using keyword matching and semantic similarity...` },
+    { icon: '📄', name: 'Retrieving relevant chunks', color: 'var(--text2)', active: false },
+    { icon: '🔧', name: 'Building augmented prompt', color: 'var(--text2)', active: false },
+    { icon: '🤖', name: 'Generating answer', color: 'var(--text2)', active: false },
+  ]);
+  await delay(1200);
+
+  // Step 3: retrieve top 2
+  const sorted = Object.entries(scores).sort((a,b) => b[1]-a[1]);
+  const top2 = sorted.slice(0,2).map(([id]) => knowledgeBase.find(d => d.id === id));
+  const topDoc = top2[0];
+
+  renderPipeline([
+    { icon: '❓', name: 'Question received', color: 'var(--blue)', active: true, body: `<span style="color:var(--blue)">"${query}"</span>` },
+    { icon: '🔍', name: 'Search complete', color: 'var(--orange)', active: true, body: `Ranked all ${knowledgeBase.length} documents. Top match: <strong style="color:var(--green)">${topDoc.title}</strong>` },
+    { icon: '📄', name: 'Retrieving relevant chunks', color: 'var(--purple)', active: true, loading: true, body: `Extracting the most relevant passages from the top ${top2.length} document${top2.length>1?'s':''}...` },
+    { icon: '🔧', name: 'Building augmented prompt', color: 'var(--text2)', active: false },
+    { icon: '🤖', name: 'Generating answer', color: 'var(--text2)', active: false },
+  ]);
+  await delay(1000);
+
+  // Step 4: build prompt
+  const contextText = top2.map(d => `[Document: ${d.title}]\n${d.text}`).join('\n\n');
+  const augPrompt = `<span class="ap-system">SYSTEM: You are a helpful assistant for TechCorp. Answer only using the provided context. If the answer isn't in the context, say so.</span>\n\n<span class="ap-context">CONTEXT (retrieved documents):\n${top2.map(d => `---\n[${d.title}]\n${d.text}`).join('\n')}\n---</span>\n\n<span class="ap-query">USER QUESTION: ${query}</span>`;
+
+  renderPipeline([
+    { icon: '❓', name: 'Question received', color: 'var(--blue)', active: true, body: `<span style="color:var(--blue)">"${query}"</span>` },
+    { icon: '🔍', name: 'Search complete', color: 'var(--orange)', active: true, body: `Top match: <strong style="color:var(--green)">${topDoc.title}</strong>` },
+    { icon: '📄', name: 'Chunks retrieved', color: 'var(--purple)', active: true, body: `Retrieved ${top2.length} document section${top2.length>1?'s':''}: ${top2.map(d=>`<strong style="color:var(--purple)">${d.title}</strong>`).join(', ')}` },
+    { icon: '🔧', name: 'Building augmented prompt', color: 'var(--orange)', active: true, loading: true, body: `<span style="font-size:12px;color:var(--text2)">The retrieved context is injected into the prompt before your question. This is what the AI actually receives:</span><div class="augmented-prompt">${augPrompt}</div>` },
+    { icon: '🤖', name: 'Generating answer', color: 'var(--text2)', active: false },
+  ]);
+  await delay(1400);
+
+  // Step 5: answer
+  const answerSet = answers[topDoc.id] || [];
+  const ql = query.toLowerCase();
+  let picked = answerSet.find(a => a.q !== 'default' && ql.includes(a.q));
+  if (!picked) picked = answerSet.find(a => a.q === 'default');
+  const finalAnswer = picked ? picked.a : `Based on the retrieved documents, I found relevant information in <strong>${topDoc.title}</strong>: ${topDoc.text.substring(0, 200)}...`;
+
+  renderPipeline([
+    { icon: '❓', name: 'Question received', color: 'var(--blue)', active: true, body: `<span style="color:var(--blue)">"${query}"</span>` },
+    { icon: '🔍', name: 'Search complete', color: 'var(--orange)', active: true, body: `Top match: <strong style="color:var(--green)">${topDoc.title}</strong>` },
+    { icon: '📄', name: 'Chunks retrieved', color: 'var(--purple)', active: true, body: `Retrieved: ${top2.map(d=>`<strong style="color:var(--purple)">${d.title}</strong>`).join(', ')}` },
+    { icon: '🔧', name: 'Augmented prompt built', color: 'var(--orange)', active: true, body: 'Context injected into prompt ✅' },
+    { icon: '🤖', name: 'Answer generated', color: 'var(--green)', active: true, body: `<div class="answer-box">${finalAnswer}<div class="answer-source">📄 Sources used: ${top2.map(d=>d.title).join(' · ')}</div></div>` },
+  ]);
+}
+</script>
+</body>
+</html>

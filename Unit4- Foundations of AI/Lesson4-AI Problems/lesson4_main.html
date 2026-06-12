@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How AI Can Go Wrong — And How We Fix It</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f3ee;
+    --surface: #ffffff;
+    --border: #e8dfd0;
+    --text: #221a0f;
+    --text2: #5a4e3a;
+    --orange: #e06b2a;
+    --orange-light: #fdf0e6;
+    --blue: #2563a8;
+    --blue-light: #e8f0fb;
+    --green: #1e7d46;
+    --green-light: #e8f5ee;
+    --red: #c0392b;
+    --red-light: #fdf0ee;
+    --purple: #7b3fbe;
+    --purple-light: #f3eeff;
+    --teal: #0e7490;
+    --teal-light: #e6f7fb;
+    --yellow: #b45309;
+    --yellow-light: #fef3c7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.75; }
+
+  /* HEADER */
+  .page-header { background: linear-gradient(135deg, #1a1035 0%, #2d1a5e 60%, #3b2278 100%); color: white; padding: 56px 48px 48px; position: relative; overflow: hidden; }
+  .page-header::after { content: ''; position: absolute; right: -60px; top: -60px; width: 340px; height: 340px; background: radial-gradient(circle, rgba(123,63,190,0.35) 0%, transparent 70%); border-radius: 50%; }
+  .lesson-badge { display: inline-block; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: 700; font-family: 'Nunito', sans-serif; letter-spacing: 0.5px; margin-bottom: 16px; }
+  .page-header h1 { font-family: 'Nunito', sans-serif; font-size: 36px; font-weight: 900; line-height: 1.15; max-width: 620px; margin-bottom: 14px; position: relative; z-index: 1; }
+  .page-header .subtitle { font-size: 17px; opacity: 0.85; max-width: 560px; position: relative; z-index: 1; }
+
+  /* NAV */
+  .nav-bar { background: var(--surface); border-bottom: 2px solid var(--border); display: flex; gap: 0; padding: 0 48px; overflow-x: auto; position: sticky; top: 0; z-index: 100; scrollbar-width: none; }
+  .nav-bar::-webkit-scrollbar { display: none; }
+  .nav-link { padding: 14px 16px; font-size: 13px; font-weight: 700; font-family: 'Nunito', sans-serif; color: var(--text2); text-decoration: none; border-bottom: 3px solid transparent; white-space: nowrap; transition: color 0.15s, border-color 0.15s; cursor: pointer; }
+  .nav-link:hover, .nav-link.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+  /* LAYOUT */
+  .main { max-width: 880px; margin: 0 auto; padding: 48px 48px 100px; }
+  .section { margin-bottom: 72px; }
+  .section-header { display: flex; align-items: center; gap: 16px; margin-bottom: 36px; padding-bottom: 18px; border-bottom: 2px solid var(--border); }
+  .section-emoji { font-size: 38px; flex-shrink: 0; }
+  .section-header h2 { font-family: 'Nunito', sans-serif; font-size: 28px; font-weight: 900; color: var(--text); line-height: 1.2; }
+  .section-sub { font-size: 13px; color: var(--text2); font-weight: 700; margin-top: 3px; letter-spacing: 0.3px; }
+  h3 { font-family: 'Nunito', sans-serif; font-size: 21px; font-weight: 800; color: var(--text); margin: 40px 0 14px; }
+  h3:first-of-type { margin-top: 0; }
+  p { margin-bottom: 14px; color: var(--text2); font-size: 15.5px; line-height: 1.75; }
+  p strong { color: var(--text); font-weight: 700; }
+  ul, ol { padding-left: 22px; color: var(--text2); margin-bottom: 14px; }
+  li { margin-bottom: 8px; font-size: 15.5px; line-height: 1.65; }
+  li strong { color: var(--text); font-weight: 700; }
+
+  /* CALLOUT BOXES */
+  .box { border-radius: 16px; padding: 22px 26px; margin: 20px 0; }
+  .box-label { font-family: 'Nunito', sans-serif; font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+  .box p { margin: 0; font-size: 15.5px; }
+  .box p:not(:last-child) { margin-bottom: 10px; }
+  .big-idea { background: var(--orange-light); border: 2px solid #f0c090; }
+  .big-idea .box-label { color: var(--orange); }
+  .big-idea p { color: #5a2a05; }
+  .story { background: var(--blue-light); border: 2px solid #b0c8e8; }
+  .story .box-label { color: var(--blue); }
+  .story p { color: #1a3060; }
+  .remember { background: var(--green-light); border: 2px solid #90d0aa; }
+  .remember .box-label { color: var(--green); }
+  .remember p { color: #0a3020; }
+  .warning { background: var(--yellow-light); border: 2px solid #e0c060; }
+  .warning .box-label { color: var(--yellow); }
+  .warning p { color: #4a2800; }
+  .try-it { background: var(--purple-light); border: 2px solid #c0a0e0; }
+  .try-it .box-label { color: var(--purple); }
+  .try-it ul { color: #3a1060; margin: 0; }
+  .try-it li { font-size: 15px; }
+
+  /* CARDS GRID */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 20px 0; }
+  .card { background: var(--surface); border: 2px solid var(--border); border-radius: 14px; padding: 20px 18px; transition: border-color 0.15s, box-shadow 0.15s; }
+  .card:hover { border-color: var(--orange); box-shadow: 0 4px 18px rgba(224,107,42,0.1); }
+  .card-emoji { font-size: 30px; margin-bottom: 10px; }
+  .card-title { font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 7px; }
+  .card p { font-size: 13.5px; color: var(--text2); margin: 0; line-height: 1.55; }
+
+  /* COMPARISON TABLE */
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 14.5px; margin: 18px 0; border-radius: 12px; overflow: hidden; }
+  .compare-table th { background: #2d1a5e; color: white; padding: 13px 16px; text-align: left; font-family: 'Nunito', sans-serif; font-weight: 800; }
+  .compare-table td { padding: 12px 16px; border: 1px solid var(--border); color: var(--text2); vertical-align: top; }
+  .compare-table td:first-child { font-weight: 700; color: var(--text); white-space: nowrap; font-size: 14px; }
+  .compare-table tr:nth-child(even) td { background: #faf7f2; }
+
+  /* SPECTRUM BAR */
+  .spectrum { margin: 24px 0; }
+  .spectrum-bar { height: 16px; border-radius: 8px; background: linear-gradient(to right, #27ae60, #f39c12, #e74c3c); margin: 12px 0 6px; position: relative; }
+  .spectrum-labels { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: var(--text2); }
+  .spectrum-marker { position: absolute; top: -24px; transform: translateX(-50%); font-size: 11px; font-weight: 800; color: white; background: #2d1a5e; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+  .spectrum-marker::after { content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); border: 4px solid transparent; border-top-color: #2d1a5e; }
+
+  /* CODE BLOCK */
+  .code-block { background: #1a1035; color: #c8f0a0; border-radius: 12px; padding: 18px 22px; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.9; margin: 16px 0; overflow-x: auto; white-space: pre; }
+  .code-comment { color: #8080c0; }
+  .code-keyword { color: #ff9966; }
+  .code-string { color: #ffe066; }
+  code { background: #f0ebe0; border: 1px solid #d8d0c0; padding: 2px 7px; border-radius: 5px; font-family: 'Courier New', monospace; font-size: 13px; color: #7b3fbe; }
+
+  /* JS FILE CARD */
+  .js-card { background: var(--surface); border: 2px solid #b0c8e8; border-radius: 16px; overflow: hidden; margin: 20px 0; }
+  .js-card-header { background: #1a1035; padding: 12px 20px; display: flex; align-items: center; gap: 10px; }
+  .js-card-header .filename { font-family: 'Courier New', monospace; font-size: 14px; color: #c8f0a0; font-weight: 700; }
+  .js-card-header .file-desc { font-size: 12px; color: rgba(200,240,160,0.6); margin-left: auto; }
+  .js-card-body { padding: 16px 20px; }
+  .js-card-body p { font-size: 14px; color: var(--text2); margin: 0 0 10px; }
+
+  /* DEMO WRAP */
+  .demo-wrap { background: var(--surface); border: 2px solid var(--border); border-radius: 16px; overflow: hidden; margin: 20px 0; }
+  .demo-header { background: #1a1035; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .demo-title { font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800; color: white; }
+  .demo-btn { display: inline-block; background: var(--orange); color: white; border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 800; text-decoration: none; transition: opacity 0.15s; white-space: nowrap; }
+  .demo-btn:hover { opacity: 0.85; }
+  .demo-btn.outline { background: transparent; border: 2px solid white; }
+
+  /* STEP FLOW */
+  .flow { display: flex; align-items: stretch; gap: 0; margin: 20px 0; flex-wrap: wrap; }
+  .flow-step { flex: 1; min-width: 140px; background: var(--surface); border: 2px solid var(--border); border-radius: 12px; padding: 16px 14px; text-align: center; position: relative; }
+  .flow-step + .flow-step::before { content: '→'; position: absolute; left: -18px; top: 50%; transform: translateY(-50%); font-size: 20px; color: var(--text2); font-weight: 900; }
+  .flow-step .f-emoji { font-size: 26px; margin-bottom: 8px; }
+  .flow-step .f-num { font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--orange); margin-bottom: 5px; }
+  .flow-step .f-title { font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+  .flow-step p { font-size: 12.5px; color: var(--text2); margin: 0; }
+
+  /* OVERVIEW OBJECTIVES */
+  .obj-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin: 20px 0; }
+  .obj-item { background: var(--surface); border: 2px solid var(--border); border-radius: 12px; padding: 16px 18px; display: flex; gap: 12px; align-items: flex-start; }
+  .obj-emoji { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+  .obj-item p { font-size: 14px; color: var(--text2); margin: 0; }
+
+  /* BADGE */
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 800; font-family: 'Nunito', sans-serif; }
+  .badge-orange { background: var(--orange-light); color: var(--orange); border: 1px solid #f0c090; }
+  .badge-green { background: var(--green-light); color: var(--green); border: 1px solid #90d0aa; }
+  .badge-red { background: var(--red-light); color: var(--red); border: 1px solid #f0b0a0; }
+  .badge-purple { background: var(--purple-light); color: var(--purple); border: 1px solid #c0a0e0; }
+
+  /* PROMPT EXAMPLES */
+  .prompt-box { border-radius: 12px; padding: 16px 20px; margin: 12px 0; }
+  .prompt-bad { background: var(--red-light); border: 2px solid #f0b0a0; }
+  .prompt-bad .plabel { color: var(--red); font-size: 11px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .prompt-bad p { color: #4a1010; font-family: 'Courier New', monospace; font-size: 14px; margin: 0; }
+  .prompt-good { background: var(--green-light); border: 2px solid #90d0aa; }
+  .prompt-good .plabel { color: var(--green); font-size: 11px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .prompt-good p { color: #0a3020; font-family: 'Courier New', monospace; font-size: 14px; margin: 0; line-height: 1.6; }
+
+  /* SECTION DIVIDER */
+  .section-divider { border: none; border-top: 2px dashed var(--border); margin: 40px 0; }
+
+  @media (max-width: 640px) {
+    .page-header, .main { padding-left: 20px; padding-right: 20px; }
+    .nav-bar { padding-left: 16px; }
+    .page-header h1 { font-size: 26px; }
+    .flow-step + .flow-step::before { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <div class="lesson-badge">Unit 4 · Foundations of AI — Lesson 4</div>
+  <h1>How AI Can Go Wrong — And How We Fix It</h1>
+</header>
+
+<nav class="nav-bar">
+  <span class="nav-link active" onclick="scrollTo('overview')">🗺 Overview</span>
+  <span class="nav-link" onclick="scrollTo('section1')">⚠️ AI Problems</span>
+  <span class="nav-link" onclick="scrollTo('section2')">🎛 Controlling AI</span>
+  <span class="nav-link" onclick="scrollTo('section3')">✍️ Prompting</span>
+  <span class="nav-link" onclick="scrollTo('section4')">📚 RAG</span>
+  <span class="nav-link" onclick="scrollTo('section5')">🎓 Fine-tuning</span>
+</nav>
+
+<main class="main">
+
+<!-- ═══════════════════════════════════════════════ OVERVIEW -->
+<section class="section" id="overview">
+  <div class="section-header">
+    <div class="section-emoji">🗺</div>
+    <div>
+      <h2>What We're Learning Today</h2>
+      <div class="section-sub">5 Big Topics</div>
+    </div>
+  </div>
+
+  <p>AI systems like ChatGPT and Claude are incredibly powerful — but they are not perfect. Today we explore <strong>what goes wrong</strong> with AI and the tools engineers use to <strong>make it better</strong>.</p>
+
+  <div class="obj-grid">
+    <div class="obj-item"><div class="obj-emoji">⚠️</div><p><strong>Problems:</strong> Bias, hallucinations, safety risks, and the "black box" mystery</p></div>
+    <div class="obj-item"><div class="obj-emoji">🎛</div><p><strong>Parameters:</strong> The dials you can turn to change how an AI responds</p></div>
+    <div class="obj-item"><div class="obj-emoji">✍️</div><p><strong>Prompting:</strong> The art and science of asking AI the right way</p></div>
+    <div class="obj-item"><div class="obj-emoji">📚</div><p><strong>RAG:</strong> Giving AI access to your own private information</p></div>
+    <div class="obj-item"><div class="obj-emoji">🎓</div><p><strong>Fine-tuning:</strong> Teaching an AI new habits with your own data</p></div>
+  </div>
+
+  <div class="big-idea">
+    <div class="box-label">🌟 The Central Idea</div>
+    <p>A base AI model fresh out of training is like a very well-read but untamed intern. It knows a lot, but it might be wrong sometimes, make things up, carry biases, or not know about your specific company or field. Everything in today's lesson is about how to work with that</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ SECTION 1: PROBLEMS -->
+<section class="section" id="section1">
+  <div class="section-header">
+    <div class="section-emoji">⚠️</div>
+    <div>
+      <h2>Problems and Challenges With AI</h2>
+      <div class="section-sub">Section 1 — Why AI Isn't Perfect</div>
+    </div>
+  </div>
+
+  <!-- BIAS -->
+  <h3>1. Bias — The AI Learned Our Prejudices</h3>
+  <p>Remember how we learned that AI learns from enormous amounts of text written by humans? Books, websites, articles, social media posts... billions of words. The problem: <strong>humans have biases</strong>, and the AI absorbed them all.</p>
+
+  <div class="story">
+    <div class="box-label">📚 Simple Analogy — Learning from a Biased Textbook</div>
+    <p>Imagine a child who learns about professions only by reading books from the 1950s. Every doctor in those books is male. Every nurse is female. After reading thousands of such books, the child now has biased assumptions because that's all they were exposed to.</p>
+    <p>An AI trained on historical text has absorbed the same kind of historical biases. It didn't choose them. It just learned from what it read.</p>
+  </div>
+
+  <p>Bias shows up in many forms:</p>
+  <div class="cards">
+    <div class="card">
+      <div class="card-emoji">👩‍⚕️</div>
+      <div class="card-title">Gender bias</div>
+      <p>Assuming a doctor is male, a nurse is female, or that certain jobs belong to certain genders</p>
+    </div>
+    <div class="card">
+      <div class="card-emoji">📰</div>
+      <div class="card-title">Representation bias</div>
+      <p>Certain viewpoints, languages, and communities are underrepresented in the training data</p>
+    </div>
+    <div class="card">
+      <div class="card-emoji">🔁</div>
+      <div class="card-title">Confirmation bias</div>
+      <p>Popular opinions online are more represented, making the AI lean toward majority views</p>
+    </div>
+  </div>
+
+  <p>Bias also has a connection to <strong>privacy and intellectual property</strong>. The text used to train AI was often taken from the internet without permission. This means:</p>
+  <ul>
+    <li>Private information that was online may have been swept into training data</li>
+    <li>Books, articles, and creative works were used to train AI without the author's consent or payment</li>
+    <li>The AI might reproduce pieces of copyrighted text without realising it</li>
+  </ul>
+
+  <div class="warning">
+    <div class="box-label">⚡ Important to Know</div>
+    <p>None of this means AI is evil or should be abandoned. It means we need to be <strong>aware</strong> of these limitations and not blindly trust AI outputs on sensitive topics. Always apply human judgement.</p>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- HALLUCINATIONS -->
+  <h3>2. Hallucinations — When AI Confidently Makes Things Up</h3>
+  <p>This is perhaps the most important AI problem to understand. A <strong>hallucination</strong> is when an AI states something that is completely made up but presents it with total confidence, as if it were a well-established fact.</p>
+
+  <div class="story">
+    <div class="box-label">👻 What a Hallucination Looks Like</div>
+    <p>You ask an AI: <em>"Who wrote the 1987 book 'The Architecture of Learning'?"</em></p>
+    <p>The AI confidently replies: <em>"That book was written by Professor James T. Hawkins of Stanford University and won the National Book Award that year."</em></p>
+    <p>The problem? That book doesn't exist. Professor Hawkins doesn't exist. The award never happened. The AI invented every single detail but said it with complete confidence, no hesitation, no "I'm not sure."</p>
+  </div>
+
+  <p><strong>Why does this happen?</strong> Remember that an AI's job is to predict the most likely next word. When it doesn't know the answer, it doesn't say "I don't know" by default, it generates a plausible-sounding answer based on patterns. It's doing what it always does (predicting text), but in a situation where it has no real knowledge to draw from.</p>
+
+  <div class="big-idea">
+    <div class="box-label">🎯 Strict Definition — What IS and ISN'T a Hallucination</div>
+    <p><strong>A hallucination</strong> is specifically when AI generates a <em>factually wrong statement that sounds confident and real</em>. It's a confident lie the AI doesn't know it's telling.</p>
+    <p><strong>Not all AI errors are hallucinations.</strong> If the AI says "I don't know," that's not a hallucination that's honesty. If the AI misunderstands your question and answers a different question correctly, that's a misunderstanding, not a hallucination. If it makes a maths error, that's a calculation mistake, not a hallucination. Hallucination specifically means: generated false information presented as true.</p>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-emoji">📚</div>
+      <div class="card-title">Fake citations</div>
+      <p>Making up journal articles, book titles, and author names that don't exist</p>
+    </div>
+    <div class="card">
+      <div class="card-emoji">👤</div>
+      <div class="card-title">Fake people</div>
+      <p>Inventing biographies for people who don't exist, or mixing up real people's facts</p>
+    </div>
+    <div class="card">
+      <div class="card-emoji">📅</div>
+      <div class="card-title">Wrong facts</div>
+      <p>Getting statistics, dates, laws, or scientific results completely wrong but sounding sure</p>
+    </div>
+    <div class="card">
+      <div class="card-emoji">💻</div>
+      <div class="card-title">Broken code</div>
+      <p>Generating code that uses libraries or functions that don't exist</p>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- SAFETY -->
+  <h3>3. Safety — AI Can Be Misused</h3>
+  <p>AI is a powerful tool. Like all powerful tools, it can be used for harm if the wrong people use it in the wrong ways.</p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-emoji">💬</div>
+      <div class="card-title">Unsafe outputs</div>
+      <p>AI generating harmful, offensive, dangerous, or illegal content if not properly restricted</p>
+    </div>
+  
+    <div class="card">
+      <div class="card-emoji">🔪</div>
+      <div class="card-title">Malicious use</div>
+      <p>Bad actors using AI to generate disinformation, scam messages, or dangerous instructions at scale</p>
+    </div>
+    <div class="card">
+      <div class="card-emoji">🤖</div>
+      <div class="card-title">Prompt injection</div>
+      <p>Hiding instructions inside content (like a document) that trick the AI into doing unintended things</p>
+    </div>
+  </div>
+
+
+
+  <hr class="section-divider">
+
+  <!-- BLACK BOX -->
+  <h3>4. The Black Box — Nobody Knows Why AI Says What It Says</h3>
+  <p>This one surprises many people. Even the engineers who built ChatGPT cannot fully explain <em>why</em> it gives a particular answer. The AI is what's called a <strong>"black box"</strong> — you can see what goes in (your prompt) and what comes out (the answer), but the process in the middle is almost impossible to interpret.</p>
+
+  <div class="story">
+    <div class="box-label">📦 The Black Box Analogy</div>
+    <p>Imagine a machine that takes vegetables in one end and produces meals at the other end. You can see the vegetables going in and the meal coming out. But the machine has no windows, no labels, no on/off switches you can examine — you have no idea what's happening inside. You can experiment (put in carrots, see what meal comes out), but you can't read the recipe.</p>
+    <p>Neural networks with billions of parameters are like this. Each output is the result of millions of tiny mathematical operations happening simultaneously. There's no single "decision point" to point to.</p>
+  </div>
+
+  <div class="big-idea">
+    <div class="box-label">🚨 A Common Misconception</div>
+    <p>People often think: <em>"Can't you just ask the AI to explain its reasoning?"</em> This seems logical — but it doesn't actually work. When you ask an AI <em>why</em> it said something, it generates a plausible-sounding explanation — but this explanation is itself just another AI output. It's not a window into the actual calculations. The AI is <strong>making up</strong> a reason that sounds reasonable, not reading out its actual decision process.</p>
+    <p>Think of it like asking a calculator "why did you get 42?" — the calculator can't answer that. It just computed. The AI is the same, except it's very good at generating convincing-sounding answers.</p>
+  </div>
+
+
+</section>
+
+<!-- ═══════════════════════════════════════════════ SECTION 2: PARAMETERS -->
+<section class="section" id="section2">
+  <div class="section-header">
+    <div class="section-emoji">🎛</div>
+    <div>
+      <h2>Controlling AI — Inference Parameters</h2>
+      <div class="section-sub">Section 2 — The Dials That Change AI's Behaviour</div>
+    </div>
+  </div>
+
+  <p>Before we look at how to improve AI for specific jobs, let's understand the basic controls available. When you use an AI, there are several <strong>parameters</strong> (settings) you can adjust to change how it responds. These are the simplest way to shape AI behaviour.</p>
+
+  <div class="big-idea">
+    <div class="box-label">🎛 Analogy — Adjusting a Music Mixer</div>
+    <p>A DJ at a concert has a mixing board with many dials — bass, treble, volume, reverb. The underlying music is the same, but by adjusting the dials, they can completely change how it sounds. AI inference parameters are those dials. The model is the same underneath, but the output changes dramatically based on how the dials are set.</p>
+  </div>
+
+  <h3>The Four Main Parameters</h3>
+  <p>Open the <code>demo_parameters.js</code> file in your browser to see these in action. Here's what each one means:</p>
+
+  <div class="js-card">
+    <div class="js-card-header">
+      <span class="filename">demo_parameters.js</span>
+      <span class="file-desc">Interactive parameter demo</span>
+    </div>
+    <div class="js-card-body">
+      <p>Run this file to see all four parameters and how changing them affects AI output in real time.</p>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-emoji">🌡</div>
+      <div class="card-title">Temperature</div>
+      <p><strong>What it controls:</strong> How "creative" or "random" the AI is.<br><br><strong>Low (0.1):</strong> Safe, predictable, repetitive. Always gives the most likely answer.<br><br><strong>High (1.5):</strong> Wild, creative, surprising — sometimes too surprising (nonsense).<br><br><strong>Sweet spot:</strong> Around 0.7 for most tasks.</p>
+    </div>
+    <div class="card">
+      <div class="card-emoji">🔝</div>
+      <div class="card-title">Top P</div>
+      <p><strong>What it controls:</strong> The variety of words the AI considers when picking the next word.<br><br><strong>Low (0.1):</strong> Only considers the very top, most likely words (safe but boring).<br><br><strong>High (0.9):</strong> Considers a much wider range of possible words (more variety).<br><br>Works together with Temperature.</p>
+    </div>
+    <div class="card">
+      <div class="card-emoji">🔢</div>
+      <div class="card-title">Top K</div>
+      <p><strong>What it controls:</strong> A hard limit on how many word options the AI considers.<br><br><strong>Top K = 5:</strong> Only ever considers the 5 most likely next words.<br><br><strong>Top K = 50:</strong> Considers up to 50 possible next words, giving more variety.<br><br>Think of it as the size of the AI's "menu."</p>
+    </div>
+    <div class="card">
+      <div class="card-emoji">📏</div>
+      <div class="card-title">Max Tokens</div>
+      <p><strong>What it controls:</strong> The maximum length of the AI's response.<br><br><strong>Low (50):</strong> Forces very short responses.<br><br><strong>High (2000):</strong> Allows long, detailed responses.<br><br>One token ≈ ¾ of a word. 100 tokens ≈ 75 words.</p>
+    </div>
+  </div>
+
+  <h3>Limitations of a Basic AI Model</h3>
+  <p>Even with perfect parameter settings, a base AI model has two big limitations out of the box:</p>
+  <div class="cards">
+    <div class="card">
+      <div class="card-emoji">📅</div>
+      <div class="card-title">Knowledge cutoff</div>
+      <p>AI training stops at a certain date. It knows nothing about events after that date. Ask it about last week's news and it simply won't know — it's not connected to the internet by default.</p>
+    </div>
+    <div class="card">
+      <div class="card-emoji">🔒</div>
+      <div class="card-title">No private data</div>
+      <p>A base model has never seen your company's documents, your customer data, your internal policies, or anything that wasn't publicly available on the internet. It can't answer questions about your specific business.</p>
+    </div>
+  </div>
+
+  <div class="warning">
+    <div class="box-label">💡 Why Not Just Train a New AI?</div>
+    <p>The obvious solution might seem to be: "Let's just train our own AI from scratch with our private data." This is not realistic for almost anyone. Training a large language model from scratch requires <strong>thousands of high-end GPUs running for months</strong>, and costs between $10 million and $100 million+. Even large tech companies rarely do this — everyone uses existing foundation models as the starting point.</p>
+  </div>
+
+  <p>So how do we give an AI access to our private data without retraining from scratch? That's what Sections 4 and 5 are about — RAG and fine-tuning.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════ SECTION 3: PROMPTING -->
+<section class="section" id="section3">
+  <div class="section-header">
+    <div class="section-emoji">✍️</div>
+    <div>
+      <h2>Prompting — Asking AI the Right Way</h2>
+      <div class="section-sub">Section 3 — The First and Simplest Fix</div>
+    </div>
+  </div>
+
+  <h3>Two Different Things: Prompting vs Prompt Engineering</h3>
+  <p>These two terms sound similar but mean different things:</p>
+
+  <table class="compare-table">
+    <thead><tr><th>Term</th><th>Who Does It</th><th>What It Is</th><th>Goal</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Prompting</td>
+        <td>End users (you, me, everyone)</td>
+        <td>The skill of writing good questions/instructions to get useful results</td>
+        <td>Get a good answer for your specific task right now</td>
+      </tr>
+      <tr>
+        <td>Prompt Engineering</td>
+        <td>Developers building AI products</td>
+        <td>A structured, scientific process of testing and optimising prompts at scale</td>
+        <td>Build a reliable system that works well for thousands of users</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="story">
+    <div class="box-label">🍳 A Kitchen Analogy</div>
+    <p><strong>Prompting</strong> is like knowing how to cook for yourself — knowing that you need to season the water, not overcook the pasta, and how to balance flavours. Anyone can learn this. It improves your results immediately.</p>
+    <p><strong>Prompt engineering</strong> is like being a head chef at a restaurant — testing recipes hundreds of times, writing precise instructions for other chefs, and making sure every dish that leaves the kitchen is consistent and perfect.</p>
+  </div>
+
+  <h3>Why Does Prompting Matter?</h3>
+  <p>Prompting is the <strong>cheapest, fastest, and simplest</strong> way to improve what you get from AI. Before spending money on more complex solutions (like RAG or fine-tuning), a well-written prompt can get you surprisingly far.</p>
+
+  <h3>The Bad Prompt vs Good Prompt Transformation</h3>
+  <p>See this live in <code>demo_prompting.js</code>. Here's the idea:</p>
+
+  <div class="js-card">
+    <div class="js-card-header">
+      <span class="filename">demo_prompting.js</span>
+      <span class="file-desc">Prompt improvement demo</span>
+    </div>
+    <div class="js-card-body">
+      <p>This file shows the same task asked with a poor prompt vs a well-engineered prompt, and demonstrates how the output quality changes dramatically.</p>
+    </div>
+  </div>
+
+  <div class="prompt-box prompt-bad">
+    <div class="plabel">❌ Bad Prompt</div>
+    <p>Write something about climate change.</p>
+  </div>
+  <div class="prompt-box prompt-good">
+    <div class="plabel">✅ Much Better Prompt</div>
+    <p>You are a science communicator writing for a general audience with no science background.<br><br>Write a 3-paragraph explanation of why the ocean absorbs CO2 and why this is both helpful and dangerous.<br><br>Use simple language, avoid jargon, and include one concrete real-world example in each paragraph.<br><br>Format: three paragraphs with no headings.</p>
+  </div>
+
+  <h3>The Core Prompting Principles</h3>
+  <div class="cards">
+    <div class="card">
+      <div class="card-emoji">🎭</div>
+      <div class="card-title">Give it a role</div>
+      <p>"You are a helpful customer service agent for a UK bank" tells the AI exactly how to behave, what tone to use, and what to know.</p>
+    </div>
+    <div class="card">
+      <div class="card-emoji">🎯</div>
+      <div class="card-title">Be specific</div>
+      <p>"Summarise this" is vague. "Summarise this in 3 bullet points for a non-technical manager" is specific. Specific = better results.</p>
+    </div>
+    <div class="card">
+      <div class="card-emoji">📋</div>
+      <div class="card-title">Specify the format</div>
+      <p>Tell it exactly how you want the output: "as a numbered list", "in a table", "in 2 paragraphs", "under 100 words". Don't leave format to chance.</p>
+    </div>
+    <div class="card">
+      <div class="card-emoji">📚</div>
+      <div class="card-title">Give examples</div>
+      <p>Show it what a good answer looks like. "Here's an example of the format I want: [example]" is one of the most powerful techniques.</p>
+    </div>
+    <div class="card">
+      <div class="card-emoji">🧠</div>
+      <div class="card-title">Ask it to think</div>
+      <p>"Think step by step before answering" or "explain your reasoning first" dramatically improves accuracy on complex tasks.</p>
+    </div>
+    <div class="card">
+      <div class="card-emoji">🚫</div>
+      <div class="card-title">Say what NOT to do</div>
+      <p>"Do not use bullet points. Do not mention competitors. Do not use technical jargon." Negative instructions are just as important as positive ones.</p>
+    </div>
+  </div>
+
+  <div class="try-it">
+    <div class="box-label">🎮 Try It — The Prompt Makeover</div>
+    <ul>
+      <li>Open <code>demo_prompting.js</code> in your browser</li>
+      <li>See the "before" prompt and its output — notice how vague and generic it is</li>
+      <li>Apply the improvements one by one and see the output change at each step</li>
+      <li>Try writing your own bad prompt on any topic, then improve it using the principles above</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ SECTION 4: RAG -->
+<section class="section" id="section4">
+  <div class="section-header">
+    <div class="section-emoji">📚</div>
+    <div>
+      <h2>RAG — Giving AI Your Own Information</h2>
+      <div class="section-sub">Section 4 — Retrieval-Augmented Generation</div>
+    </div>
+  </div>
+
+  <h3>The Problem RAG Solves</h3>
+  <p>We established that a base AI model doesn't know about your private data. If you work at a hospital and want an AI to answer questions about your hospital's specific policies, procedures, and patient history guidelines — a standard AI can't do that. It never saw those documents.</p>
+  <p>You could paste the documents into the prompt every time — but what if you have thousands of documents? You can't paste all of them. This is where RAG comes in.</p>
+
+  <div class="big-idea">
+    <div class="box-label">📚 The Library Assistant Analogy</div>
+    <p>Imagine you hired a very smart research assistant who has read millions of general books (that's the base AI model). But they've never been inside your company's private library.</p>
+    <p>RAG is like this: when you ask your assistant a question, <strong>before they answer</strong>, they run into your private library, grab the most relevant pages, read them, and then answer your question using both their general knowledge and those specific pages.</p>
+    <p>They don't read the entire library every time. They just retrieve the relevant parts for this specific question.</p>
+  </div>
+
+  <h3>How RAG Works — Step by Step</h3>
+  <p>See this illustrated in <code>demo_rag.js</code>. Here's the flow:</p>
+
+  <div class="js-card">
+    <div class="js-card-header">
+      <span class="filename">demo_rag.js</span>
+      <span class="file-desc">RAG pipeline simulation</span>
+    </div>
+    <div class="js-card-body">
+      <p>This file simulates a mini RAG system. You ask a question, it searches a small "knowledge base," retrieves the relevant chunks, and generates an answer using them.</p>
+    </div>
+  </div>
+
+  <div class="flow">
+    <div class="flow-step">
+      <div class="f-emoji">❓</div>
+      <div class="f-num">Step 1</div>
+      <div class="f-title">User asks a question</div>
+      <p>"What is our refund policy for digital products?"</p>
+    </div>
+    <div class="flow-step">
+      <div class="f-emoji">🔍</div>
+      <div class="f-num">Step 2</div>
+      <div class="f-title">Search knowledge base</div>
+      <p>The system searches your private documents for the most relevant passages</p>
+    </div>
+    <div class="flow-step">
+      <div class="f-emoji">📄</div>
+      <div class="f-num">Step 3</div>
+      <div class="f-title">Retrieve relevant chunks</div>
+      <p>The 2-3 most relevant document sections are pulled out</p>
+    </div>
+    <div class="flow-step">
+      <div class="f-emoji">💬</div>
+      <div class="f-num">Step 4</div>
+      <div class="f-title">Augment the prompt</div>
+      <p>Those sections are added to the prompt: "Using the info below, answer the user's question..."</p>
+    </div>
+    <div class="flow-step">
+      <div class="f-emoji">✅</div>
+      <div class="f-num">Step 5</div>
+      <div class="f-title">AI generates answer</div>
+      <p>The AI now answers using your private documents as context</p>
+    </div>
+  </div>
+
+  <h3>Why RAG Is Often the "Sweet Spot"</h3>
+  <p>RAG sits in the middle of three approaches — compare them below:</p>
+
+  <div class="spectrum">
+    <div class="spectrum-bar">
+      <span class="spectrum-marker" style="left: 10%">Prompting only</span>
+      <span class="spectrum-marker" style="left: 50%">RAG ← sweet spot</span>
+      <span class="spectrum-marker" style="left: 88%">Fine-tuning</span>
+    </div>
+    <div class="spectrum-labels">
+      <span>Cheap & Simple</span>
+      <span>Expensive & Complex</span>
+    </div>
+  </div>
+
+  <table class="compare-table">
+    <thead><tr><th>Approach</th><th>Cost</th><th>Complexity</th><th>Best for</th></tr></thead>
+    <tbody>
+      <tr><td>Prompting only</td><td>✅ Free</td><td>✅ Simple</td><td>General tasks, no private data needed</td></tr>
+      <tr><td>RAG</td><td>🟡 Low–Medium</td><td>🟡 Moderate</td><td>Questions about your documents, policies, knowledge base</td></tr>
+      <tr><td>Fine-tuning</td><td>🔴 Expensive</td><td>🔴 Complex</td><td>Teaching new skills, changing personality/tone deeply</td></tr>
+    </tbody>
+  </table>
+
+  <div class="remember">
+    <div class="box-label">✅ Key Takeaway</div>
+    <p>RAG is popular in real businesses because it solves the most common business problem — "our AI needs to know about our specific documents" — without the enormous cost and complexity of fine-tuning. It's relatively quick to set up, the knowledge base is easy to update (just add new documents), and it works very well. We'll explore it in much more depth later in the course.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ SECTION 5: FINE-TUNING -->
+<section class="section" id="section5">
+  <div class="section-header">
+    <div class="section-emoji">🎓</div>
+    <div>
+      <h2>Fine-tuning — Teaching AI New Habits</h2>
+      <div class="section-sub">Section 5 — The Most Powerful (and Expensive) Approach</div>
+    </div>
+  </div>
+
+  <h3>What Is Fine-tuning?</h3>
+  <p>Fine-tuning is <strong>continuing to train an existing AI model</strong> using your own private data. The base model already knows how to do language. Fine-tuning adjusts it to behave differently — to use your company's tone of voice, know your specific domain deeply, or follow a very specific format every time.</p>
+
+  <div class="story">
+    <div class="box-label">🎓 The New Employee Analogy</div>
+    <p>Imagine hiring a brilliant, well-educated new employee (base model). They already know how to read, write, communicate, and think. Now you send them to a 3-month training programme specifically for your company — they learn your company's tone of voice, your industry's specific terminology, your internal processes, and how to write in exactly your brand style.</p>
+    <p>After training, they don't just <em>know</em> your style — they <em>embody</em> it. Every response naturally sounds like your company without being told to. That transformation is what fine-tuning does.</p>
+  </div>
+
+  <h3>What Fine-tuning Actually Changes</h3>
+  <p>Fine-tuning changes the actual <strong>weights</strong> inside the model — the millions of numbers that determine how it behaves. This is the key difference from prompting and RAG:</p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-emoji">✍️</div>
+      <div class="card-title">Prompting</div>
+      <p>You tell the model what to do every single time you use it. It forgets between sessions. Like giving someone a script to read.</p>
+    </div>
+    <div class="card">
+      <div class="card-emoji">📚</div>
+      <div class="card-title">RAG</div>
+      <p>You give the model relevant documents to read before answering. It uses that info but is still the same model underneath.</p>
+    </div>
+    <div class="card">
+      <div class="card-emoji">🎓</div>
+      <div class="card-title">Fine-tuning</div>
+      <p>You permanently change how the model works. The new behaviour is baked in. No script needed every time — it just behaves that way naturally.</p>
+    </div>
+  </div>
+
+  <div class="warning">
+    <div class="box-label">⚠️ The Common Misconception</div>
+    <p>Many businesses think: <em>"We'll fine-tune our AI on our internal documents and it'll know all our company knowledge."</em> This often disappoints people. Fine-tuning is better at teaching <em>how to write</em> than <em>what to know</em>. For specific facts and knowledge, <strong>RAG is usually the better choice</strong>.</p>
+    <p>Use fine-tuning for: consistent brand voice, specific response formats, industry-specific writing style.<br>Use RAG for: answering questions from specific documents, accessing up-to-date information.</p>
+  </div>
+
+  <h3>When Is Fine-tuning the Right Choice?</h3>
+  <div class="cards">
+    <div class="card">
+      <div class="card-emoji">✅</div>
+      <div class="card-title">Good fit</div>
+      <p>You need a very specific tone or writing style consistently. You have high volume usage where big system prompts are expensive. You need the model to reliably output a specific format.</p>
+    </div>
+    <div class="card">
+      <div class="card-emoji">❌</div>
+      <div class="card-title">Not a good fit</div>
+      <p>You mainly need the AI to know about specific documents or facts. Your knowledge base changes frequently. You're on a tight budget. You want to understand why the AI says what it says.</p>
+    </div>
+  </div>
+
+  <div class="remember">
+    <div class="box-label">✅ Key Takeaway</div>
+    <p>Fine-tuning is real training — it permanently changes the model. It's the most powerful tool but also the most expensive and complex. Most businesses solve their AI problems with prompting + RAG before ever considering fine-tuning. Think of it as a last resort, not a first step.</p>
+  </div>
+</section>
+
+</main>
+
+<script>
+function scrollTo(id) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+const sections = document.querySelectorAll('.section');
+const links = document.querySelectorAll('.nav-link');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      links.forEach(l => l.classList.toggle('active', l.getAttribute('onclick')?.includes(id)));
+    }
+  });
+}, { threshold: 0.2 });
+sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>demo_prompting.js — Prompt Improvement Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:wght@400;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e1a0e; --surface: #141e14; --border: #253525;
+    --text: #d8f0d8; --text2: #7a9a7a; --green: #7eff9a;
+    --orange: #ffaa40; --red: #ff6060; --blue: #80d0ff; --purple: #c090ff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+
+  .header { padding: 28px 40px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px; }
+  .file-badge { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px 14px; font-family: 'Fira Code', monospace; font-size: 14px; color: var(--green); }
+  .header-title { font-family: 'Nunito', sans-serif; font-size: 20px; font-weight: 800; color: var(--text); }
+  .header-sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
+
+  .main { max-width: 1000px; margin: 0 auto; padding: 28px 40px 60px; }
+
+  /* STEP PROGRESS */
+  .step-nav { display: flex; gap: 6px; margin-bottom: 28px; flex-wrap: wrap; }
+  .step-pill { padding: 8px 14px; border-radius: 20px; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800; cursor: pointer; border: 1px solid var(--border); color: var(--text2); background: var(--surface); transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+  .step-pill.done { border-color: var(--green); color: var(--green); background: rgba(126,255,154,0.07); }
+  .step-pill.current { border-color: var(--orange); color: var(--orange); background: rgba(255,170,64,0.1); }
+  .step-pill:hover { border-color: var(--text2); color: var(--text); }
+
+  /* TWO COL */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  @media (max-width: 700px) { .cols { grid-template-columns: 1fr; } }
+
+  .pane { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .pane-header { padding: 12px 18px; border-bottom: 1px solid var(--border); font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+  .pane-body { padding: 18px; }
+  .ph-bad { color: var(--red); background: rgba(255,96,96,0.06); }
+  .ph-good { color: var(--green); background: rgba(126,255,154,0.06); }
+  .ph-output { color: var(--blue); background: rgba(128,208,255,0.06); }
+  .ph-hint { color: var(--orange); background: rgba(255,170,64,0.06); }
+
+  .prompt-text { font-family: 'Fira Code', monospace; font-size: 13px; line-height: 1.8; color: var(--text); white-space: pre-wrap; word-break: break-word; }
+  .highlight { background: rgba(126,255,154,0.15); border-radius: 3px; padding: 1px 4px; color: var(--green); }
+
+  .output-text { font-size: 14px; color: var(--text2); line-height: 1.8; }
+  .output-text strong { color: var(--text); font-weight: 600; }
+
+  .score-row { display: flex; align-items: center; gap: 12px; margin: 14px 0 6px; }
+  .score-label { font-size: 12px; color: var(--text2); font-family: 'Nunito', sans-serif; font-weight: 700; width: 100px; flex-shrink: 0; }
+  .score-bar-wrap { flex: 1; height: 10px; background: rgba(255,255,255,0.06); border-radius: 5px; overflow: hidden; }
+  .score-bar { height: 100%; border-radius: 5px; transition: width 0.8s ease; }
+  .score-num { font-family: 'Fira Code', monospace; font-size: 12px; color: var(--text2); width: 36px; text-align: right; }
+
+  .principle-added { background: rgba(126,255,154,0.08); border: 1px solid rgba(126,255,154,0.25); border-radius: 10px; padding: 12px 16px; margin-top: 16px; }
+  .pa-label { font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--green); margin-bottom: 6px; font-family: 'Nunito', sans-serif; }
+  .pa-text { font-size: 13px; color: #90d890; line-height: 1.55; }
+
+  .nav-btns { display: flex; gap: 10px; margin-top: 20px; }
+  .nav-btn { padding: 10px 22px; border-radius: 10px; font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800; cursor: pointer; transition: all 0.15s; border: none; }
+  .btn-prev { background: var(--surface); border: 1px solid var(--border); color: var(--text2); }
+  .btn-prev:hover { color: var(--text); border-color: var(--text2); }
+  .btn-next { background: var(--orange); color: #2a1000; }
+  .btn-next:hover { opacity: 0.85; }
+  .btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div><div class="file-badge">demo_prompting.js</div></div>
+  <div>
+    <div class="header-title">Prompt Improvement — Step by Step</div>
+    <div class="header-sub">Watch a terrible prompt transform into a great one, one principle at a time</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="step-nav" id="step-nav"></div>
+
+  <div class="cols">
+    <div>
+      <div class="pane">
+        <div class="pane-header ph-bad">❌ Current Prompt</div>
+        <div class="pane-body"><pre class="prompt-text" id="prompt-display"></pre></div>
+      </div>
+
+      <div class="principle-added" id="principle-box" style="display:none">
+        <div class="pa-label">✅ Principle just added</div>
+        <div class="pa-text" id="principle-text"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="pane">
+        <div class="pane-header ph-output">🤖 AI Output</div>
+        <div class="pane-body">
+          <div class="output-text" id="output-display"></div>
+          <div style="margin-top:16px">
+            <div class="score-row"><span class="score-label">Specificity</span><div class="score-bar-wrap"><div class="score-bar" id="sc-spec" style="background:var(--orange)"></div></div><span class="score-num" id="scn-spec"></span></div>
+            <div class="score-row"><span class="score-label">Usefulness</span><div class="score-bar-wrap"><div class="score-bar" id="sc-use" style="background:var(--blue)"></div></div><span class="score-num" id="scn-use"></span></div>
+            <div class="score-row"><span class="score-label">Accuracy</span><div class="score-bar-wrap"><div class="score-bar" id="sc-acc" style="background:var(--green)"></div></div><span class="score-num" id="scn-acc"></span></div>
+            <div class="score-row"><span class="score-label">Format</span><div class="score-bar-wrap"><div class="score-bar" id="sc-fmt" style="background:var(--purple)"></div></div><span class="score-num" id="scn-fmt"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="nav-btn btn-prev" onclick="changeStep(-1)" id="btn-prev">← Previous</button>
+    <button class="nav-btn btn-next" onclick="changeStep(1)" id="btn-next">Next improvement →</button>
+  </div>
+</div>
+
+<script>
+const steps = [
+  {
+    label: "Start — Bad Prompt",
+    icon: "❌",
+    prompt: `Write something about climate change.`,
+    principle: null,
+    output: `Climate change is a very important topic that affects everyone. It is caused by greenhouse gases like carbon dioxide that trap heat in the atmosphere. This is causing temperatures to rise around the world. We need to take action to reduce emissions and protect the planet for future generations. Scientists agree that climate change is real and happening now.`,
+    scores: { spec: 5, use: 10, acc: 40, fmt: 5 }
+  },
+  {
+    label: "Add a Role",
+    icon: "🎭",
+    prompt: `You are a science communicator who explains complex topics to people with no science background.
+
+Write something about climate change.`,
+    principle: `Added: "You are a science communicator who explains complex topics to people with no science background." — Giving the AI a role immediately tells it the tone, vocabulary level, and approach to use. The output is now aimed at the right audience.`,
+    output: `Climate change is happening because we're releasing huge amounts of carbon dioxide into the air — mostly by burning oil, gas, and coal for energy. Carbon dioxide acts like a blanket around the Earth, trapping heat that would otherwise escape into space. The more of this "blanket" we add, the warmer the planet gets. This is already causing more extreme weather, rising sea levels, and shifting seasons around the world.`,
+    scores: { spec: 20, use: 30, acc: 65, fmt: 15 }
+  },
+  {
+    label: "Be Specific",
+    icon: "🎯",
+    prompt: `You are a science communicator who explains complex topics to people with no science background.
+
+Explain specifically why the ocean absorbs CO2 and why this is both helpful and harmful for life on Earth.`,
+    principle: `Changed the vague "write something about climate change" to a specific, focused question. The AI now knows exactly what aspect to address. Specific input → specific, useful output.`,
+    output: `The ocean acts like a giant sponge for carbon dioxide. When CO2 dissolves in seawater, it forms carbonic acid — the same weak acid in fizzy drinks. This is helpful because it slows down climate change by removing CO2 from the atmosphere. But it's also harmful: as the ocean becomes more acidic, it dissolves the shells and skeletons of creatures like corals, oysters, and tiny sea snails that millions of other species depend on for food and habitat.`,
+    scores: { spec: 65, use: 60, acc: 80, fmt: 25 }
+  },
+  {
+    label: "Specify the Format",
+    icon: "📋",
+    prompt: `You are a science communicator who explains complex topics to people with no science background.
+
+Explain specifically why the ocean absorbs CO2 and why this is both helpful and harmful for life on Earth.
+
+Format: Exactly 3 paragraphs. No bullet points. No headings. Each paragraph under 80 words.`,
+    principle: `Added explicit format instructions. Without these, the AI might give a bullet list, a single block of text, or ten paragraphs. Telling it exactly "3 paragraphs, no bullets, no headings, under 80 words each" gives us control over the output structure.`,
+    output: `<strong>Paragraph 1 (54 words):</strong> The ocean absorbs about a quarter of all the carbon dioxide humans produce. When CO₂ dissolves in seawater, a simple chemical reaction occurs: the CO₂ combines with water to form carbonic acid. This pulls carbon out of the atmosphere and into the sea, which has significantly slowed the rate of global warming over the past century.<br><br><strong>Paragraph 2 (61 words):</strong> This absorption is genuinely helpful. Without the ocean acting as a carbon sink, atmospheric CO₂ concentrations — and therefore temperatures — would be rising much faster than they are. Scientists estimate that without this effect, Earth would already be around 0.5°C warmer than it currently is. The ocean has been quietly protecting us from the worst effects of climate change.<br><br><strong>Paragraph 3 (67 words):</strong> But there is a cost. As more CO₂ dissolves into seawater, the water becomes more acidic — a process called ocean acidification. This extra acidity dissolves the calcium carbonate that corals and shellfish use to build their shells and skeletons. Coral reefs, which support roughly 25% of all marine species, are particularly vulnerable. As the ocean absorbs more CO₂, it slowly destroys the very ecosystems it helped protect.`,
+    scores: { spec: 80, use: 80, acc: 85, fmt: 75 }
+  },
+  {
+    label: "Give an Example",
+    icon: "📚",
+    prompt: `You are a science communicator who explains complex topics to people with no science background.
+
+Explain specifically why the ocean absorbs CO2 and why this is both helpful and harmful for life on Earth.
+
+Format: Exactly 3 paragraphs. No bullet points. No headings. Each paragraph under 80 words.
+
+Include one concrete, real-world example or comparison that a non-scientist can picture in each paragraph.`,
+    principle: `Examples are one of the most powerful prompting tools. Abstract scientific concepts become understandable when grounded in real, familiar comparisons. "The ocean absorbs CO₂" is forgettable. "Like adding fizzy drink acid to seawater on a planetary scale" creates a mental image.`,
+    output: `<strong>Paragraph 1:</strong> The ocean absorbs about a quarter of all the carbon dioxide humans release — roughly equivalent to absorbing all the CO₂ produced by every car, truck, and plane in the United States every year. When this CO₂ dissolves in seawater, it forms carbonic acid: the exact same weak acid that makes sparkling water fizzy. This chemical reaction draws carbon out of the air and stores it in the sea.<br><br><strong>Paragraph 2:</strong> Without this process, we'd be in significantly more trouble. Think of the ocean as a massive credit card payment on our carbon debt — it's absorbing a huge portion of the emissions we're generating and keeping them out of the atmosphere. Scientists estimate that without this ocean absorption, atmospheric CO₂ levels would be roughly 50% higher than they are today, and global temperatures would already be catastrophically elevated.<br><br><strong>Paragraph 3:</strong> But the ocean is paying a price for absorbing our carbon. The extra carbonic acid is dissolving coral reefs, which are built from calcium carbonate — the same material as chalk or eggshells. The Great Barrier Reef, the world's largest coral system and home to 9,000 species, has lost roughly half its coral cover since 1995. The ocean is sacrificing its own ecosystems to protect us from the climate consequences of our emissions.`,
+    scores: { spec: 90, use: 92, acc: 90, fmt: 88 }
+  },
+  {
+    label: "Say What NOT to Do",
+    icon: "🚫",
+    prompt: `You are a science communicator who explains complex topics to people with no science background.
+
+Explain specifically why the ocean absorbs CO2 and why this is both helpful and harmful for life on Earth.
+
+Format: Exactly 3 paragraphs. No bullet points. No headings. Each paragraph under 80 words.
+
+Include one concrete, real-world example or comparison that a non-scientist can picture in each paragraph.
+
+Do NOT use the words "greenhouse gas" or "climate crisis." Do NOT be alarmist or political. Do NOT start any paragraph with the word "The."`,
+    principle: `Negative instructions are just as powerful as positive ones. Telling the AI what NOT to do helps you avoid the patterns it defaults to. Here we've removed jargon ("greenhouse gas"), prevented a political tone, and even blocked a specific repeated sentence structure ("The ocean..." opening every paragraph).`,
+    output: `<strong>Paragraph 1:</strong> Roughly a quarter of all the carbon dioxide humans produce ends up dissolved in the ocean — equivalent to taking every car and truck off roads worldwide for a full year. Once dissolved, it reacts with water to form carbonic acid: the same compound that makes fizzy drinks tingle on your tongue. This chemical reaction quietly removes carbon from the air and locks it into the sea.<br><br><strong>Paragraph 2:</strong> Without this absorption, we would face significantly faster warming. Imagine the ocean as a sponge pressed against the side of a leaking pipe — it's soaking up an enormous share of what escapes before it spreads through the atmosphere. Scientists calculate that without it, atmospheric CO₂ would be roughly 50% higher today, and temperatures would already be dangerously elevated beyond current levels.<br><br><strong>Paragraph 3:</strong> Absorbing all that carbon comes with consequences. Carbonic acid is slowly dissolving coral reefs, which are constructed from calcium carbonate — the same material as chalk or eggshells. Australia's Great Barrier Reef, home to more than 9,000 species, has lost around half its coral since 1995. By drawing down our carbon, oceans are quietly eroding one of Earth's most complex ecosystems in exchange.`,
+    scores: { spec: 95, use: 96, acc: 93, fmt: 95 }
+  }
+];
+
+let current = 0;
+
+function render() {
+  const s = steps[current];
+
+  // Step nav
+  document.getElementById('step-nav').innerHTML = steps.map((st, i) =>
+    `<span class="step-pill ${i < current ? 'done' : i === current ? 'current' : ''}" onclick="goStep(${i})">${st.icon} ${st.label}</span>`
+  ).join('');
+
+  // Prompt display with highlights
+  let promptHtml = s.prompt;
+  // Highlight new lines added in this step
+  if (current > 0) {
+    const prevPrompt = steps[current - 1].prompt;
+    const newLines = s.prompt.split('\n').filter(line => !prevPrompt.includes(line) && line.trim().length > 0);
+    newLines.forEach(line => {
+      if (line.trim()) {
+        promptHtml = promptHtml.replace(line, `<span class="highlight">${line}</span>`);
+      }
+    });
+  }
+  document.getElementById('prompt-display').innerHTML = promptHtml;
+
+  // Principle
+  const pb = document.getElementById('principle-box');
+  if (s.principle) {
+    pb.style.display = 'block';
+    document.getElementById('principle-text').textContent = s.principle;
+  } else {
+    pb.style.display = 'none';
+  }
+
+  // Output
+  document.getElementById('output-display').innerHTML = s.output;
+
+  // Scores
+  const animate = (id, nid, val) => {
+    const bar = document.getElementById(id);
+    const num = document.getElementById(nid);
+    setTimeout(() => { bar.style.width = val + '%'; num.textContent = val + '%'; }, 100);
+  };
+  animate('sc-spec', 'scn-spec', s.scores.spec);
+  animate('sc-use', 'scn-use', s.scores.use);
+  animate('sc-acc', 'scn-acc', s.scores.acc);
+  animate('sc-fmt', 'scn-fmt', s.scores.fmt);
+
+  // Buttons
+  document.getElementById('btn-prev').disabled = current === 0;
+  document.getElementById('btn-next').textContent = current === steps.length - 1 ? '✅ Done!' : 'Next improvement →';
+  document.getElementById('btn-next').disabled = current === steps.length - 1;
+
+  // Header colour
+  document.querySelector('.pane-header.ph-bad').className =
+    `pane-header ${current === steps.length - 1 ? 'ph-good' : 'ph-bad'}`;
+  document.querySelector('.pane-header.ph-bad, .pane-header.ph-good').textContent =
+    current === 0 ? '❌ Bad Prompt' :
+    current === steps.length - 1 ? '✅ Excellent Prompt' :
+    `✏️ Improving (step ${current} of ${steps.length - 1})`;
+}
+
+function changeStep(dir) {
+  current = Math.max(0, Math.min(steps.length - 1, current + dir));
+  render();
+}
+
+function goStep(i) {
+  current = i;
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
