@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>demo_reasoning.html — Chain-of-Thought Demo</title>
+<style>
+  :root { --bg: #faf9f6; --surface: #fff; --border: #e2ddd3; --text: #2b2620; --text2: #6b6258; --red: #b8503a; --green: #2f8a5c; --accent: #c2622e; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: var(--bg); color: var(--text); padding: 30px; font-size: 15px; line-height: 1.6; }
+  .wrap { max-width: 820px; margin: 0 auto; }
+  h1 { font-size: 22px; margin-bottom: 6px; }
+  .sub { color: var(--text2); font-size: 14px; margin-bottom: 24px; }
+
+  .problem-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin-bottom: 24px; }
+  .problem-box .label { font-size: 11px; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+  .problem-box p { margin: 0; font-style: italic; }
+
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 650px) { .cols { grid-template-columns: 1fr; } }
+
+  .pane { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .pane-header { padding: 10px 16px; font-weight: bold; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; }
+  .ph-bad { background: #fbeae5; color: var(--red); }
+  .ph-good { background: #e6f3ec; color: var(--green); }
+  .pane-body { padding: 16px; font-size: 14px; }
+
+  .prompt-text { font-family: 'Courier New', monospace; font-size: 13px; background: #f5f1eb; border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; }
+
+  .response { line-height: 1.7; color: var(--text2); }
+  .response strong { color: var(--text); }
+  .step { padding: 8px 0; border-bottom: 1px dashed var(--border); opacity: 0; transition: opacity 0.4s; }
+  .step.show { opacity: 1; }
+  .step:last-child { border-bottom: none; }
+  .step .step-num { color: var(--accent); font-weight: bold; font-size: 12px; }
+
+  .final-answer { margin-top: 12px; padding: 10px 14px; border-radius: 6px; font-weight: bold; }
+  .fa-wrong { background: #fbeae5; color: var(--red); }
+  .fa-right { background: #e6f3ec; color: var(--green); }
+
+  .controls { text-align: center; margin: 24px 0; }
+  button { font-family: Arial, sans-serif; background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 10px 22px; font-size: 14px; font-weight: bold; cursor: pointer; }
+  button:hover { opacity: 0.85; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .problem-nav { display: flex; gap: 6px; justify-content: center; margin-bottom: 18px; }
+  .problem-nav span { padding: 5px 12px; border: 1px solid var(--border); border-radius: 20px; font-size: 12px; cursor: pointer; color: var(--text2); }
+  .problem-nav span.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  .note { font-size: 13px; color: var(--text2); margin-top: 18px; padding: 12px 16px; background: #fdf6ee; border-radius: 6px; border: 1px solid #f0d8b8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>demo_reasoning.html — Does "Think Step by Step" Really Help?</h1>
+  <div class="sub">Watch the same problem get solved two ways. Click "Run" to generate both responses.</div>
+
+  <div class="problem-nav" id="problem-nav"></div>
+
+  <div class="problem-box">
+    <div class="label">The Problem</div>
+    <p id="problem-text"></p>
+  </div>
+
+  <div class="cols">
+    <div class="pane">
+      <div class="pane-header ph-bad">❌ Without reasoning — straight to the answer</div>
+      <div class="pane-body">
+        <div class="prompt-text" id="prompt-bad"></div>
+        <div class="response" id="response-bad"></div>
+      </div>
+    </div>
+    <div class="pane">
+      <div class="pane-header ph-good">✅ With "Let's think step by step"</div>
+      <div class="pane-body">
+        <div class="prompt-text" id="prompt-good"></div>
+        <div class="response" id="response-good"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button onclick="runDemo()" id="run-btn">▶ Run Both</button>
+  </div>
+
+  <div class="note">
+    <strong>Why does the left side fail?</strong> Without reasoning, the model picks the most "statistically likely sounding" number based on patterns in similar text — often a tempting but wrong shortcut. With reasoning, each step builds correctly on the last, leading to the right answer.
+  </div>
+</div>
+
+<script>
+const problems = [
+  {
+    text: "A bakery sells muffins in boxes of 6. If the bakery baked 134 muffins, how many boxes can they fill completely, and how many muffins are left over?",
+    badAnswer: `<strong>Answer:</strong> The bakery can fill <strong>22 boxes</strong> with <strong>2 muffins</strong> left over.`,
+    badCorrect: false,
+    goodSteps: [
+      "First, I need to figure out how many full boxes of 6 fit into 134 muffins.",
+      "I'll divide 134 by 6. 6 × 20 = 120. That leaves 134 - 120 = 14 muffins remaining.",
+      "6 × 2 = 12, which fits into the remaining 14. So that's 20 + 2 = 22 full boxes so far, using 132 muffins.",
+      "134 - 132 = 2 muffins remaining, which isn't enough for another full box."
+    ],
+    goodAnswer: `<strong>Answer:</strong> The bakery can fill <strong>22 boxes</strong> with <strong>2 muffins</strong> left over.`,
+    // note: in this case both happen to land on the same number by chance of random pick below — handled dynamically
+  },
+  {
+    text: "Sarah is twice as old as her brother Tom. In 4 years, Sarah will be 26. How old is Tom right now?",
+    badAnswer: `<strong>Answer:</strong> Tom is <strong>13 years old</strong>.`,
+    badCorrect: false,
+    goodSteps: [
+      "Sarah will be 26 in 4 years, so Sarah's current age is 26 - 4 = 22.",
+      "Sarah is twice as old as Tom, so Tom's current age is Sarah's age divided by 2.",
+      "22 ÷ 2 = 11.",
+      "So Tom is currently 11 years old."
+    ],
+    goodAnswer: `<strong>Answer:</strong> Tom is <strong>11 years old</strong>.`
+  },
+  {
+    text: "A train travels 60 miles in the first hour, then increases its speed by 20 miles per hour for the second hour. How far did the train travel in total over 2 hours?",
+    badAnswer: `<strong>Answer:</strong> The train travelled <strong>140 miles</strong> in total.`,
+    badCorrect: false,
+    goodSteps: [
+      "In the first hour, the train travels 60 miles.",
+      "In the second hour, the speed increases by 20 mph, so the new speed is 60 + 20 = 80 mph.",
+      "At 80 mph for one hour, the train covers 80 miles in the second hour.",
+      "Total distance = 60 + 80 = 140 miles."
+    ],
+    goodAnswer: `<strong>Answer:</strong> The train travelled <strong>140 miles</strong> in total.`
+  }
+];
+
+let currentProblem = 0;
+
+// Render problem nav
+document.getElementById('problem-nav').innerHTML = problems.map((p, i) =>
+  `<span class="${i===0?'active':''}" onclick="selectProblem(${i})">Problem ${i+1}</span>`
+).join('');
+
+function selectProblem(i) {
+  currentProblem = i;
+  document.querySelectorAll('.problem-nav span').forEach((s, j) => s.classList.toggle('active', i===j));
+  loadProblem();
+}
+
+function loadProblem() {
+  const p = problems[currentProblem];
+  document.getElementById('problem-text').textContent = p.text;
+  document.getElementById('prompt-bad').textContent = `"${p.text}"`;
+  document.getElementById('prompt-good').textContent = `"${p.text} Let's think step by step."`;
+  document.getElementById('response-bad').innerHTML = '<span style="color:#bbb">Press Run to see the answer...</span>';
+  document.getElementById('response-good').innerHTML = '<span style="color:#bbb">Press Run to see the answer...</span>';
+  document.getElementById('run-btn').disabled = false;
+}
+
+// Slightly-wrong "confident" bad answers tuned per problem to feel realistic
+const badAnswersFixed = [
+  `<strong>Answer:</strong> The bakery can fill <strong>20 boxes</strong> with <strong>14 muffins</strong> left over.`,
+  `<strong>Answer:</strong> Tom is <strong>13 years old</strong>.`,
+  `<strong>Answer:</strong> The train travelled <strong>120 miles</strong> in total.`
+];
+
+async function runDemo() {
+  document.getElementById('run-btn').disabled = true;
+  const p = problems[currentProblem];
+  const delay = ms => new Promise(r => setTimeout(r, ms));
+
+  // Bad side - instant wrong answer
+  const badEl = document.getElementById('response-bad');
+  badEl.innerHTML = '<span style="color:#bbb">Thinking...</span>';
+  await delay(500);
+  badEl.innerHTML = `<div class="final-answer fa-wrong">${badAnswersFixed[currentProblem]} ❌</div>`;
+
+  await delay(300);
+
+  // Good side - step by step
+  const goodEl = document.getElementById('response-good');
+  goodEl.innerHTML = '';
+  for (let i = 0; i < p.goodSteps.length; i++) {
+    const div = document.createElement('div');
+    div.className = 'step';
+    div.innerHTML = `<span class="step-num">Step ${i+1}:</span> ${p.goodSteps[i]}`;
+    goodEl.appendChild(div);
+    await delay(450);
+    div.classList.add('show');
+  }
+  await delay(400);
+  const finalDiv = document.createElement('div');
+  finalDiv.className = 'final-answer fa-right';
+  finalDiv.innerHTML = `${p.goodAnswer} ✅`;
+  goodEl.appendChild(finalDiv);
+
+  document.getElementById('run-btn').disabled = false;
+}
+
+loadProblem();
+</script>
+</body>
+</html>

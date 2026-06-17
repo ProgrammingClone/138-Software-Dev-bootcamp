@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>demo_structured.html — Structured Output Demo</title>
+<style>
+  :root { --bg: #faf9f6; --surface: #fff; --border: #e2ddd3; --text: #2b2620; --text2: #6b6258; --red: #b8503a; --green: #2f8a5c; --accent: #c2622e; --yellow: #b08a2e; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: var(--bg); color: var(--text); padding: 30px; font-size: 15px; line-height: 1.6; }
+  .wrap { max-width: 820px; margin: 0 auto; }
+  h1 { font-size: 22px; margin-bottom: 6px; }
+  .sub { color: var(--text2); font-size: 14px; margin-bottom: 24px; }
+
+  .prompt-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin-bottom: 20px; }
+  .prompt-box .label { font-size: 11px; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+  .prompt-box .ptext { font-family: 'Courier New', monospace; font-size: 13px; color: var(--text2); }
+  .prompt-box .input-text { font-style: italic; margin-top: 8px; color: var(--text); }
+
+  .schema-box { background: #f5f1eb; border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; font-family: 'Courier New', monospace; font-size: 13px; }
+  .schema-box .label { font-size: 11px; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; font-family: Arial, sans-serif; }
+  .schema-box .field { color: var(--text2); }
+  .schema-box .field b { color: var(--text); }
+  .schema-box .type { color: #6e4ba0; }
+
+  .controls { text-align: center; margin: 20px 0; }
+  button { font-family: Arial, sans-serif; background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 10px 22px; font-size: 14px; font-weight: bold; cursor: pointer; }
+  button:hover { opacity: 0.85; }
+
+  .runs { display: flex; flex-direction: column; gap: 10px; }
+  .run-item { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; display: flex; gap: 14px; align-items: flex-start; opacity: 0; transform: translateY(6px); transition: all 0.4s; }
+  .run-item.show { opacity: 1; transform: translateY(0); }
+  .run-num { font-size: 12px; color: var(--text2); font-weight: bold; width: 60px; flex-shrink: 0; padding-top: 2px; }
+  .run-output { font-family: 'Courier New', monospace; font-size: 13px; flex: 1; white-space: pre-wrap; word-break: break-word; }
+  .run-status { font-size: 12px; font-weight: bold; padding: 3px 10px; border-radius: 12px; white-space: nowrap; flex-shrink: 0; }
+  .status-pass { background: #e6f3ec; color: var(--green); }
+  .status-fail { background: #fbeae5; color: var(--red); }
+
+  .issue-tag { display: inline-block; font-size: 11px; background: #fdf6ee; border: 1px solid #f0d8b8; color: var(--yellow); padding: 1px 6px; border-radius: 4px; margin-left: 6px; }
+
+  .summary-box { margin-top: 20px; padding: 14px 18px; border-radius: 8px; background: #f5f1eb; font-size: 14px; }
+  .summary-box strong { color: var(--accent); }
+
+  .note { font-size: 13px; color: var(--text2); margin-top: 18px; padding: 12px 16px; background: #fdf6ee; border-radius: 6px; border: 1px solid #f0d8b8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>demo_structured.html — Why "Just Return JSON" Isn't Enough</h1>
+  <div class="sub">We'll send the same prompt to the AI 6 times and see how the output varies — then check each against a schema.</div>
+
+  <div class="prompt-box">
+    <div class="label">Prompt sent every time</div>
+    <div class="ptext">Extract the product name, price (as a number), and category from this text. Return only JSON with fields: name, price, category.</div>
+    <div class="input-text">Input: "The new UltraBoost running shoes are now on sale for £89.99 — perfect for athletes."</div>
+  </div>
+
+  <div class="schema-box">
+    <div class="label">Our schema (what we require)</div>
+    <div class="field"><b>name</b>: <span class="type">string</span> — must be present</div>
+    <div class="field"><b>price</b>: <span class="type">number</span> — must be a numeric value, not text</div>
+    <div class="field"><b>category</b>: <span class="type">string</span> — must be one of: "Footwear", "Clothing", "Electronics", "Accessories"</div>
+    <div class="field"><b>format</b>: response must be <span class="type">valid JSON only</span>, no extra text</div>
+  </div>
+
+  <div class="controls">
+    <button onclick="runDemo()" id="run-btn">▶ Send the prompt 6 times</button>
+  </div>
+
+  <div class="runs" id="runs"></div>
+
+  <div class="summary-box" id="summary" style="display:none"></div>
+
+  <div class="note" id="note" style="display:none"></div>
+</div>
+
+<script>
+const responses = [
+  {
+    text: `{"name": "UltraBoost running shoes", "price": 89.99, "category": "Footwear"}`,
+    pass: true,
+    issue: null
+  },
+  {
+    text: `Sure! Here's the extracted data:\n{"name": "UltraBoost running shoes", "price": 89.99, "category": "Footwear"}`,
+    pass: false,
+    issue: "Extra text before JSON — code expecting pure JSON will crash trying to parse this"
+  },
+  {
+    text: `{"name": "UltraBoost running shoes", "price": "£89.99", "category": "Footwear"}`,
+    pass: false,
+    issue: "price is a string (\"£89.99\"), not a number — schema requires number type"
+  },
+  {
+    text: `{"name": "UltraBoost running shoes", "price": 89.99, "category": "Shoes"}`,
+    pass: false,
+    issue: "category is \"Shoes\", not one of the allowed values (Footwear, Clothing, Electronics, Accessories)"
+  },
+  {
+    text: `{"name": "UltraBoost running shoes", "price": 89.99, "category": "Footwear"}`,
+    pass: true,
+    issue: null
+  },
+  {
+    text: `{"name": "UltraBoost running shoes", "price": 89.99 "category": "Footwear"}`,
+    pass: false,
+    issue: "Missing comma between fields — this is not valid JSON at all and will fail to parse"
+  }
+];
+
+async function runDemo() {
+  document.getElementById('run-btn').disabled = true;
+  document.getElementById('runs').innerHTML = '';
+  document.getElementById('summary').style.display = 'none';
+  document.getElementById('note').style.display = 'none';
+
+  const delay = ms => new Promise(r => setTimeout(r, ms));
+  let passCount = 0;
+
+  for (let i = 0; i < responses.length; i++) {
+    const r = responses[i];
+    const div = document.createElement('div');
+    div.className = 'run-item';
+    div.innerHTML = `
+      <div class="run-num">Run ${i+1}</div>
+      <div class="run-output">${escapeHtml(r.text)}${r.issue ? `<div class="issue-tag">⚠ ${r.issue}</div>` : ''}</div>
+      <div class="run-status ${r.pass ? 'status-pass' : 'status-fail'}">${r.pass ? '✅ Valid' : '❌ Rejected'}</div>
+    `;
+    document.getElementById('runs').appendChild(div);
+    await delay(400);
+    div.classList.add('show');
+    if (r.pass) passCount++;
+    await delay(300);
+  }
+
+  const summary = document.getElementById('summary');
+  summary.style.display = 'block';
+  summary.innerHTML = `Out of <strong>6 identical requests</strong>, only <strong>${passCount}</strong> produced output that passed validation. That's a <strong>${Math.round((6-passCount)/6*100)}% failure rate</strong> — for the exact same prompt and input, asked multiple times.`;
+
+  const note = document.getElementById('note');
+  note.style.display = 'block';
+  note.innerHTML = `<strong>What happens to the failed ones?</strong> Without validation, runs 2, 3, 4, and 6 would either crash your application, store wrong data (a string price instead of a number), or store an invalid category that breaks your filters. With validation in place, your code can detect these failures and automatically retry the request, log the issue, or fall back to a default — instead of silently corrupting your data.`;
+
+  document.getElementById('run-btn').disabled = false;
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+</script>
+</body>
+</html>

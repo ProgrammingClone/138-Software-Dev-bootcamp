@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 5 — How AI Thinks, Stays Organized, and Takes Action</title>
+<style>
+  :root {
+    --bg: #faf9f6;
+    --surface: #ffffff;
+    --border: #e2ddd3;
+    --text: #2b2620;
+    --text2: #6b6258;
+    --accent: #c2622e;
+    --blue: #2f6f9e;
+    --green: #2f8a5c;
+    --purple: #6e4ba0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, 'Times New Roman', serif; background: var(--bg); color: var(--text); font-size: 17px; line-height: 1.75; }
+
+  header { background: var(--text); color: #fff; padding: 40px 32px; }
+  header .badge { font-family: Arial, sans-serif; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.7; margin-bottom: 10px; }
+  header h1 { font-size: 30px; font-weight: normal; margin-bottom: 8px; }
+  header p { font-family: Arial, sans-serif; font-size: 14px; opacity: 0.75; max-width: 600px; }
+
+  nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; font-family: Arial, sans-serif; }
+  nav a { padding: 12px 14px; font-size: 13px; font-weight: bold; color: var(--text2); text-decoration: none; border-bottom: 2px solid transparent; white-space: nowrap; }
+  nav a.active, nav a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  main { max-width: 760px; margin: 0 auto; padding: 40px 32px 90px; }
+  section { margin-bottom: 60px; }
+  section h2 { font-size: 26px; border-bottom: 2px solid var(--border); padding-bottom: 12px; margin-bottom: 24px; }
+  section .section-meta { font-family: Arial, sans-serif; font-size: 12px; color: var(--text2); margin-top: -16px; margin-bottom: 24px; }
+  h3 { font-size: 20px; margin: 32px 0 12px; }
+  h3:first-of-type { margin-top: 0; }
+  p { margin-bottom: 14px; color: var(--text2); }
+  p strong { color: var(--text); }
+  ul, ol { padding-left: 24px; margin-bottom: 14px; color: var(--text2); }
+  li { margin-bottom: 8px; }
+  li strong { color: var(--text); }
+  code { font-family: 'Courier New', monospace; font-size: 0.9em; background: #f0ece4; border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; color: var(--purple); }
+
+  .box { border-left: 4px solid; border-radius: 6px; padding: 16px 20px; margin: 18px 0; background: var(--surface); font-family: Arial, sans-serif; font-size: 15px; }
+  .box .label { font-size: 11px; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
+  .box p { margin: 0; }
+  .box p:not(:last-child) { margin-bottom: 8px; }
+  .box-idea { border-color: var(--accent); }
+  .box-idea .label { color: var(--accent); }
+  .box-story { border-color: var(--blue); }
+  .box-story .label { color: var(--blue); }
+  .box-remember { border-color: var(--green); }
+  .box-remember .label { color: var(--green); }
+  .box-warning { border-color: #b08a2e; }
+  .box-warning .label { color: #b08a2e; }
+
+  table { width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 14px; margin: 16px 0; }
+  th { background: var(--text); color: #fff; padding: 10px 14px; text-align: left; font-weight: bold; }
+  td { padding: 10px 14px; border: 1px solid var(--border); color: var(--text2); vertical-align: top; }
+  td:first-child { font-weight: bold; color: var(--text); white-space: nowrap; }
+  tr:nth-child(even) td { background: #f5f1eb; }
+
+  .file-link { display: block; font-family: Arial, sans-serif; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; margin: 16px 0; text-decoration: none; color: var(--text); }
+  .file-link:hover { border-color: var(--accent); }
+  .file-link .fname { font-family: 'Courier New', monospace; color: var(--accent); font-weight: bold; font-size: 14px; }
+  .file-link .fdesc { font-size: 13px; color: var(--text2); margin-top: 4px; }
+
+  .flow { font-family: Arial, sans-serif; font-size: 14px; margin: 20px 0; }
+  .flow-step { display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-num { font-weight: bold; color: var(--accent); width: 24px; flex-shrink: 0; }
+  .flow-step strong { display: block; color: var(--text); margin-bottom: 2px; }
+  .flow-step span { color: var(--text2); font-size: 13.5px; }
+
+  hr { border: none; border-top: 1px dashed var(--border); margin: 36px 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Unit 4 · Foundations of AI — Lesson 5</div>
+  <h1>How AI Thinks, Stays Organized, and Takes Action</h1>
+</header>
+
+<nav>
+  <a href="#overview" class="active">Overview</a>
+  <a href="#section1">Reasoning</a>
+  <a href="#section2">Structured Outputs</a>
+  <a href="#section3">AI Agents</a>
+</nav>
+
+<main>
+
+<!-- OVERVIEW -->
+<section id="overview">
+  <h2>What We're Learning Today</h2>
+  <p>So far we've learned how AI is trained, how it reads text, and how to control its behaviour. Today we go one step further: how does AI "think through" a problem, how do we get it to give us answers in a reliable format, and how can it actually <strong>do things</strong> — not just talk?</p>
+
+  <div class="flow">
+    <div class="flow-step"><div class="flow-num">1</div><div><strong>Reasoning</strong><span>How asking AI to "think step by step" makes it dramatically smarter</span></div></div>
+    <div class="flow-step"><div class="flow-num">2</div><div><strong>Structured Outputs</strong><span>How we force AI's messy text answers into clean, predictable formats</span></div></div>
+    <div class="flow-step"><div class="flow-num">3</div><div><strong>AI Agents</strong><span>How AI can use tools, take actions, and work toward a goal on its own</span></div></div>
+  </div>
+
+  <div class="box box-idea">
+    <div class="label">The Big Picture</div>
+    <p>These three ideas build on each other. <strong>Reasoning</strong> lets AI think before it answers. <strong>Structured outputs</strong> let us trust the shape of that answer. <strong>Agents</strong> combine both — an AI that thinks about a problem, decides on an action, takes that action using a tool, and repeats until the job is done.</p>
+  </div>
+</section>
+
+<!-- SECTION 1: REASONING -->
+<section id="section1">
+  <h2>Reasoning — Teaching AI to "Think First"</h2>
+
+  <h3>AI Doesn't Actually "Think" — It Predicts</h3>
+  <p>We learned earlier that an AI model is fundamentally a next-word prediction machine. Given some text, it predicts the most likely next word, then the next, then the next. That's it. There's no little person inside "thinking" about your question.</p>
+
+  <div class="box box-story">
+    <div class="label">Simple Analogy — The World's Best Autocomplete</div>
+    <p>Imagine the autocomplete on your phone, but trained on basically the entire internet. When you type "The capital of France is", it predicts "Paris" — not because it "knows" geography in the way a person does, but because it has seen that pattern of words millions of times.</p>
+    <p>This works great for simple facts. But what about a maths problem, or a question with several steps? If the AI just blurts out the first answer that "sounds right" based on patterns, it often gets it wrong.</p>
+  </div>
+
+  <h3>The Problem With Jumping Straight to an Answer</h3>
+  <p>Imagine asking someone a tricky multi-step maths problem and demanding they shout out the answer <strong>immediately</strong>, with no time to think, no scribbling on paper. They'd probably get it wrong — not because they're bad at maths, but because they didn't get to work through the steps.</p>
+  <p>Early AI models had exactly this problem. Asked a multi-step question, they'd generate an answer immediately — and often it was wrong, even if the model "knew" all the individual facts needed to solve it.</p>
+
+  <h3>The Discovery: "Think Step by Step"</h3>
+  <p>Researchers found something surprisingly simple: if you just add the words <strong>"Let's think step by step"</strong> to the end of a prompt, the model's answers improve dramatically — sometimes from getting a problem wrong almost every time to getting it right almost every time.</p>
+
+  <div class="box box-idea">
+    <div class="label">Why Does This Work?</div>
+    <p>The AI generates text one word at a time, and each new word is influenced by everything written before it — including its own previous words. If the AI first writes out its reasoning ("First, I need to find X. Then I can use X to calculate Y..."), each step becomes part of the context for the next step.</p>
+    <p>It's like the AI is writing out its working on scrap paper. By "thinking out loud" in text, it gives itself a scaffold to build the correct answer on, instead of trying to leap straight to the final answer in one go.</p>
+  </div>
+
+  <h3>This Has a Name: Chain-of-Thought (CoT) Prompting</h3>
+  <p>This technique — asking the model to reason through a problem step-by-step before giving a final answer — is called <strong>Chain-of-Thought prompting</strong>, often shortened to <strong>CoT</strong>. It's one of the simplest and most effective prompting techniques ever discovered.</p>
+
+  <div class="file-link" href="demo_reasoning.html">
+    <div class="fname">demo_reasoning.html</div>
+    <div class="fdesc">See the same tricky problem solved two ways — with and without "think step by step" — and compare the results.</div>
+  </div>
+
+  <h3>From a Trick... to How Models Are Built</h3>
+  <p>"Think step by step" started as a prompting trick that <em>users</em> had to remember to type. But it worked so well that AI companies started asking: <em>what if the model just always did this automatically, without being told?</em></p>
+
+  <p>This led to what are now called <strong>reasoning models</strong>. During an extra training stage (called <strong>reinforcement learning</strong>, applied after the main training), these models are specifically trained to pause and reason through problems internally before producing a final answer — without the user needing to ask for it.</p>
+
+  <div class="box box-remember">
+    <div class="label">Key Takeaway</div>
+    <p>Today, almost all modern AI models do some form of reasoning, whether or not they're explicitly marketed as "reasoning models." Some show you their reasoning steps, others do it behind the scenes and only show you the final answer. Either way, the core idea is the same: <strong>better answers come from thinking before answering</strong>, and that "thinking" is really just generating helpful intermediate text.</p>
+  </div>
+</section>
+
+<!-- SECTION 2: STRUCTURED OUTPUTS -->
+<section id="section2">
+  <h2>Structured Outputs — Getting AI to Answer in a Predictable Shape</h2>
+
+  <h3>The Problem: AI Is Unpredictable by Nature</h3>
+  <p>Imagine you're building an app. A user types in a product description, and you ask an AI to extract the <strong>product name</strong>, <strong>price</strong>, and <strong>category</strong> so your app can store them in a database.</p>
+  <p>You might write a prompt like: <em>"Extract the product name, price, and category from this text, and return it as JSON."</em></p>
+  <p>This often works! But sometimes, the AI responds with something slightly different than you expected:</p>
+
+  <table>
+    <thead><tr><th>What you wanted</th><th>What you sometimes get</th></tr></thead>
+    <tbody>
+      <tr><td><code>{"name": "...", "price": 29.99, "category": "..."}</code></td><td>Sure! Here's the JSON you asked for: <code>{"name": "...", ...}</code> <em>(extra text before the JSON)</em></td></tr>
+      <tr><td><code>"price": 29.99</code> (a number)</td><td><code>"price": "£29.99"</code> (a string, with a currency symbol)</td></tr>
+      <tr><td><code>"category": "Electronics"</code></td><td><code>"category": "electronics"</code> or <code>"Electronic Devices"</code> (inconsistent wording)</td></tr>
+      <tr><td>Valid JSON</td><td>Almost-valid JSON with a missing comma or bracket</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Why Does This Happen? "Non-Determinism"</h3>
+  <p>A traditional computer program is <strong>deterministic</strong> — give it the same input, it always produces the exact same output, every time, forever. A calculator always says 2+2=4.</p>
+  <p>AI models are <strong>non-deterministic</strong> — give them the same prompt twice, and you might get two slightly different responses. We actually learned why in a previous lesson: remember <strong>temperature</strong>? Even at low settings, there's an element of probability in which word gets picked next. Multiply that across hundreds of words, and small variations add up.</p>
+
+  <div class="box box-story">
+    <div class="label">Simple Analogy — Asking a Person vs. a Vending Machine</div>
+    <p>A vending machine is deterministic: press B4, get the same chocolate bar every single time. A person, however, might describe the same chocolate bar slightly differently each time you ask — "the Mars bar," "a chocolate bar with caramel," "B4's snack." Same underlying thing, different wording each time.</p>
+    <p>AI is like the person, not the vending machine. It "knows" what you want, but how it phrases or formats the response can vary.</p>
+  </div>
+
+  <h3>Why This Is a Real Problem for Developers</h3>
+  <p>If your app's code expects <code>price</code> to always be a number, but the AI sometimes returns it as a string like <code>"£29.99"</code>, your code will crash or behave incorrectly. Multiply this by thousands of requests per day, and even a 1% failure rate becomes a significant number of broken requests.</p>
+
+  <div class="file-link" href="demo_structured.html">
+    <div class="fname">demo_structured.html</div>
+    <div class="fdesc">Watch the same prompt produce several slightly different outputs — then see how validation catches the bad ones.</div>
+  </div>
+
+  <h3>Solution 1: Validation</h3>
+  <p>The first line of defence is <strong>validation</strong> — checking the AI's output against a strict definition of what's "allowed" before your app uses it. If the output doesn't match, you reject it and can ask the AI to try again.</p>
+  <p>A popular tool for this in JavaScript/TypeScript is called <strong>Zod</strong>. With Zod, you define a "schema" — a description of exactly what shape and types your data should be — and Zod checks the AI's output against it.</p>
+
+  <div class="box box-idea">
+    <div class="label">Simple Analogy — A Bouncer With a Checklist</div>
+    <p>Think of validation as a bouncer at a club door holding a checklist: "Is this a number? Is this field present? Is this one of the allowed categories?" If the AI's output passes the checklist, it's let through to your application. If not, it's rejected — and your code can ask the AI to try again, or handle the error gracefully.</p>
+  </div>
+
+  <h3>Solution 2: Provider Tooling (Built-in Structured Outputs)</h3>
+  <p>The second approach is even more powerful: many AI providers (like OpenAI) now offer a feature often called <strong>"structured outputs"</strong> built directly into their API. Instead of just hoping the AI follows your formatting instructions, you give the provider an exact schema, and the provider <strong>guarantees</strong> the response will match it.</p>
+  <p>This works very differently from prompting. Rather than relying on the AI to "remember" to follow the format, the underlying system mathematically restricts which words the AI is even allowed to generate next — so it's <em>physically incapable</em> of producing invalid JSON.</p>
+
+  <div class="box box-remember">
+    <div class="label">Key Takeaway</div>
+    <p>Prompting alone ("please return JSON") is the weakest approach — it usually works, but "usually" isn't good enough for production software. <strong>Validation</strong> (like Zod) catches problems after the fact. <strong>Provider structured-output tools</strong> prevent the problem before it happens, by constraining what the model can generate. In real applications, teams often use both together.</p>
+  </div>
+</section>
+
+<!-- SECTION 3: AI AGENTS -->
+<section id="section3">
+  <h2>AI Agents — When AI Can Take Action</h2>
+  <div class="section-meta">Section 3 · 50 minutes</div>
+
+  <h3>What Is an AI Agent?</h3>
+  <p>So far, everything we've discussed is about AI <strong>generating text</strong> — answers, code, JSON. But text alone can't check today's weather, search a database, send an email, or browse a website. For that, the AI needs to be connected to <strong>tools</strong> that can actually do things in the real world.</p>
+
+  <div class="box box-idea">
+    <div class="label">A Simple Definition</div>
+    <p>An <strong>AI agent</strong> is: <em>giving an AI model the ability to take certain actions in order to achieve a goal.</em> The AI doesn't just respond with text — it can decide "I need to look something up," actually look it up using a tool, see the result, and then decide what to do next.</p>
+  </div>
+
+  <h3>Agents vs. Workflows — What's the Difference?</h3>
+  <p>This distinction trips a lot of people up, so let's be very clear:</p>
+
+  <table>
+    <thead><tr><th></th><th>Workflow</th><th>Agent</th></tr></thead>
+    <tbody>
+      <tr><td>Who decides the steps?</td><td>A human, in advance</td><td>The AI, in the moment</td></tr>
+      <tr><td>Order of operations</td><td>Fixed: Step 1, then Step 2, then Step 3, always</td><td>Flexible: the AI decides what to do next based on what just happened</td></tr>
+      <tr><td>Example</td><td>"Always: receive email → check spam score → if low, forward to support team"</td><td>"Figure out the best way to answer this customer's question — you can check our docs, look at their order history, or ask a follow-up question, in any order"</td></tr>
+    </tbody>
+  </table>
+
+  <div class="box box-story">
+    <div class="label">Simple Analogy — A Recipe vs. a Chef</div>
+    <p>A <strong>workflow</strong> is like a recipe: do step 1, then step 2, then step 3, in that exact order, every time. It's predictable and reliable, but inflexible — if something unexpected happens, the recipe doesn't adapt.</p>
+    <p>An <strong>agent</strong> is like a chef: given a goal ("make a tasty dinner with what's in the fridge"), the chef looks at what's available, decides what to make, checks on it while cooking, and adjusts as they go. More flexible, but also less predictable — and a less experienced chef might make worse decisions.</p>
+  </div>
+
+  <h3>What Does an Agent Need?</h3>
+  <p>For an AI to act as an agent, it needs two things — both of which we've already covered in this lesson!</p>
+
+  <ul>
+    <li><strong>Reasoning</strong> — the ability to look at a situation and decide what to do. ("The user wants to know the weather. I don't know today's weather. I should use a weather tool.")</li>
+    <li><strong>Structured outputs / tool calling</strong> — the ability to specify, in a reliable format, exactly which tool to use and what information to give it. ("Call the <code>get_weather</code> tool with <code>location: 'London'</code>.")</li>
+  </ul>
+
+  <p>Without reasoning, the AI can't decide what to do. Without structured outputs, even if it decides "I should check the weather," there's no reliable way for the surrounding code to understand and execute that decision.</p>
+
+  <h3>The ReAct Pattern: Reasoning + Acting</h3>
+  <p>One of the most common and well-known patterns for building agents is called <strong>ReAct</strong>, which stands for <strong>Re</strong>asoning + <strong>Act</strong>ing.</p>
+
+
+  <p>The ReAct pattern works in a repeating loop:</p>
+
+  <div class="flow">
+    <div class="flow-step"><div class="flow-num">1</div><div><strong>Thought</strong><span>The AI reasons about the current situation: "What do I know? What do I still need to find out?"</span></div></div>
+    <div class="flow-step"><div class="flow-num">2</div><div><strong>Action</strong><span>The AI decides to use a tool, and specifies it in a structured format: "Call <code>search_database(query='...')</code>"</span></div></div>
+    <div class="flow-step"><div class="flow-num">3</div><div><strong>Observation</strong><span>The tool runs (in your code, not inside the AI) and the result is given back to the AI</span></div></div>
+    <div class="flow-step"><div class="flow-num">4</div><div><strong>Repeat</strong><span>The AI reasons again with this new information — until it decides it has enough to give a final answer</span></div></div>
+  </div>
+
+  <div class="box box-idea">
+    <div class="label">Simple Analogy — Detective Solving a Case</div>
+    <p>A detective doesn't solve a case in one leap. They think ("I need to know where the suspect was at 9pm"), take an action (interview a witness), get an observation (the witness's answer), then think again based on that new information ("Now I should check the CCTV footage"), and so on — looping until they've solved the case.</p>
+    <p>A ReAct agent works the same way: think, act, observe, repeat, until the goal is achieved.</p>
+  </div>
+
+  <h3>What Does This Look Like in Practice?</h3>
+  <p>Here's the key thing to understand: the AI model itself <strong>never actually runs any code or calls any tool directly</strong>. The AI only ever <em>generates text</em> — that's all it can do. The "magic" is in how the surrounding program is written:</p>
+
+  <div class="flow">
+    <div class="flow-step"><div class="flow-num">1</div><div><strong>Define tools</strong><span>Your code defines simple functions — e.g. <code>get_weather(city)</code>, <code>search_products(query)</code> — and describes them to the AI (name, what it does, what input it needs)</span></div></div>
+    <div class="flow-step"><div class="flow-num">2</div><div><strong>AI decides</strong><span>The AI, given the user's goal and the list of available tools, generates structured output saying which tool it wants to call and with what input</span></div></div>
+    <div class="flow-step"><div class="flow-num">3</div><div><strong>Your code executes</strong><span>Your program reads that structured output, actually runs the real function, and gets a real result</span></div></div>
+    <div class="flow-step"><div class="flow-num">4</div><div><strong>Feed it back</strong><span>Your code sends that result back to the AI as new context, and asks it to continue</span></div></div>
+  </div>
+
+  <div class="box box-remember">
+    <div class="label">Key Takeaway</div>
+    <p>An "agent" isn't magic — it's a loop, written in normal code, that repeatedly asks the AI "given everything so far, what should happen next?", runs whatever the AI decides, and feeds the result back in. The AI provides the decision-making; your code provides the actual capability to act.</p>
+  </div>
+
+  <div class="file-link" href="demo_agent.html">
+    <div class="fname">demo_agent.html</div>
+    <div class="fdesc">Watch a simple ReAct agent answer a question step by step — see its thoughts, the tools it chooses, and the results it gets back, in real time.</div>
+  </div>
+
+  <div class="box box-idea">
+    <div class="label">Hands-On Activity</div>
+    <p>Ready to see this happen for real, not just animated? Open <code>hands_on_copilot_agent.md</code> for a step-by-step guide to watching a live ReAct loop in VS Code using GitHub Copilot's Agent mode.</p>
+  </div>
+
+  <h3>A Riskier Approach: Code Execution Agents</h3>
+  <p>The ReAct pattern above limits the AI to choosing from a small, pre-defined list of safe tools that your code controls. But there's another, more powerful approach: <strong>code execution agents</strong>, where instead of picking from a fixed list of tools, the AI <strong>writes its own code</strong> on the fly and that code gets executed.</p>
+
+  <div class="box box-warning">
+    <div class="label">Why This Is Riskier</div>
+    <p>With a fixed set of tools, you know exactly what's possible — the AI can only call <code>get_weather</code> or <code>search_products</code>, nothing else. With code execution, the AI can write <em>any</em> code, which means it could (intentionally or by mistake) do something harmful: delete files, access data it shouldn't, make unintended network requests, or get stuck in an infinite loop.</p>
+    <p>This is powerful — it lets the agent solve problems nobody anticipated in advance — but it's also much harder to make safe. <strong>If you're new to agents, stick with the ReAct pattern and a small set of carefully controlled tools until you're very comfortable with how agents behave.</strong> Code execution agents are an advanced topic for later.</p>
+  </div>
+</section>
+
+<!-- SUMMARY -->
+<section id="summary">
+  <h2>Summary — Everything in One Place</h2>
+
+  <table>
+    <thead><tr><th>Term</th><th>What It Means</th></tr></thead>
+    <tbody>
+      <tr><td>Reasoning</td><td>An AI generating intermediate "thinking" text before its final answer, which improves accuracy on complex problems.</td></tr>
+      <tr><td>Chain-of-Thought (CoT)</td><td>The specific technique/prompt of asking a model to "think step by step" before answering.</td></tr>
+      <tr><td>Reasoning model</td><td>A model trained (via reinforcement learning, after normal training) to reason automatically without being asked.</td></tr>
+      <tr><td>Non-determinism</td><td>The property of AI where the same input can produce slightly different outputs each time.</td></tr>
+      <tr><td>Structured output</td><td>AI output that follows a strict, predictable format (like JSON with specific fields and types) so code can reliably use it.</td></tr>
+      <tr><td>Validation (e.g. Zod)</td><td>Checking AI output against a defined schema after generation, and rejecting it if it doesn't match.</td></tr>
+      <tr><td>Provider structured outputs</td><td>A feature where the AI provider mathematically restricts what the model can generate, guaranteeing valid output format.</td></tr>
+      <tr><td>AI agent</td><td>An AI given the ability to take actions (via tools) to achieve a goal, deciding its own steps.</td></tr>
+      <tr><td>Workflow</td><td>A fixed, human-defined sequence of steps — the opposite of an agent's flexible decision-making.</td></tr>
+      <tr><td>Tool / function calling</td><td>A defined action (like <code>get_weather</code>) the AI can request, which your code then actually executes.</td></tr>
+      <tr><td>ReAct pattern</td><td>"Reasoning + Acting" — a loop of Thought → Action → Observation, repeated until the goal is achieved.</td></tr>
+      <tr><td>Code execution agent</td><td>An agent that writes and runs its own code rather than picking from fixed tools. More powerful, but much riskier.</td></tr>
+    </tbody>
+  </table>
+
+</section>
+
+</main>
+</body>
+</html>
