@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Product Not Found</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <div class="container py-4">
+      <div class="alert alert-warning" role="alert">
+        <h1 class="alert-heading">Product not found</h1>
+        <p>No product exists with id <strong><%= productId %></strong>.</p>
+        <hr />
+        <a href="/products" class="btn btn-primary">Back to products</a>
+      </div>
+    </div>
+  </body>
+</html>

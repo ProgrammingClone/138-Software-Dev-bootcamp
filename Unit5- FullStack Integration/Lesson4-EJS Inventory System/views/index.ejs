@@ -1,0 +1,81 @@
+
+<h2>Book Inventory</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Serial Number</th>
+      <th>Name</th>
+      <th>Tags</th>
+      <th>Author</th>
+      <th>Inventory</th>
+      <th>Units issued</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% books.forEach(book => { %>
+      <tr>
+        <td><%= book.serialNumber %></td>
+        <td><%= book.name %></td>
+        <td><%= book.tags.join(', ') %></td>
+        <td><%= book.author %></td>
+        <td><%= book.inventory %></td>
+        <td><%= book.issued %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<h3>Add a New Book</h3>
+<form id="bookForm">
+  <label for="bookName">Name:</label>
+  <input type="text" name="bookName" id="bookName" required><br>
+
+  <label for="tags">Tags:</label>
+  <input type="text" name="tags" id="tags" placeholder="e.g. Fiction, Drama" required><br>
+  
+  <label for="author">Author:</label>
+  <input type="text" name="author" id="author" required><br>
+  
+  <label for="inventory">Inventory:</label>
+  <input type="number" name="inventory" id="inventory" required><br>
+  
+  <button type="submit">Add Book</button>
+</form>
+
+<script>
+  // Handle form submission using JavaScript
+  document.getElementById('bookForm').onsubmit = async function (event) {
+    event.preventDefault(); 
+    // Collect form data
+    const formData = {
+      name: document.getElementById('bookName').value,
+      tags: document.getElementById('tags').value,
+      author: document.getElementById('author').value,
+      inventory: document.getElementById('inventory').value,
+    };
+
+    try {
+      // Send the data to the server
+      const response = await fetch('/api/books/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      // Handle the server response
+      const result = await response.json();
+      if (response.ok) {
+        alert(`Book added: ${result.response.name}`);
+        location.reload();
+      } else {
+        throw new Error(result.error)
+      }
+    } catch (error) {
+      console.error('Error submitting the form:', error);
+      alert(error);
+    }
+  };
+</script>

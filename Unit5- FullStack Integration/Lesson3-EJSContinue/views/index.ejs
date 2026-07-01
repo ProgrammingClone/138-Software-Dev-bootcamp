@@ -14,11 +14,22 @@
   <div class="container mt-4">
     <h1>Recipe List</h1>
 
-    <!-- Use a loop to render each recipe card from server data. -->
+    <div class="mb-3">
+      <input
+        id="searchInput"
+        type="search"
+        class="form-control"
+        placeholder="Search recipes by name, description, or ingredient"
+        aria-label="Recipe search"
+      />
+    </div>
+
+    <p id="noResults" class="text-warning d-none">No recipes match your search.</p>
+
     <div class="row">
       <%# Loop through recipes and render a Bootstrap card for each item. %>
       <% recipes.forEach(recipe => { %>
-        <div class="col-md-4 mb-4">
+        <div class="col-md-4 mb-4 recipe-card">
           <div class="card h-100">
             <div class="card-body d-flex flex-column">
               <h5 class="card-title">

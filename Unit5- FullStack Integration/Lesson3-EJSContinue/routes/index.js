@@ -2,9 +2,9 @@ const express = require("express");
 const recipes = require("../data/recipes");
 const router = express.Router();
 
-// Home route: Display list of all recipes
+// Home route: Display full recipe list without server-side search/filter
 router.get("/", (req, res) => {
-  res.render("index", { recipes });
+  res.render("test", { recipes });
 });
 
 // Display one recipe by name
