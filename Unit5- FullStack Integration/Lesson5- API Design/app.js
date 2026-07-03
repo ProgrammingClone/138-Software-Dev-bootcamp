@@ -5,9 +5,9 @@ const swaggerSpec = require("./config/swagger");
 
 // Routes mounted from `routes/users.js`
 const usersRouter = require("./routes/users");
-
+// middlewares
 app.use(express.json());
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec)); // load the swagger ui page on the provided endpoint with the swagger spec we have configured
 
 // Mount API routes under /api
 app.use("/api", usersRouter);
