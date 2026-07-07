@@ -1,0 +1,21 @@
+{
+  "name": "lesson6--testing",
+  "version": "1.0.0",
+  "main": "src/app.js",
+  "type": "module",
+  "scripts": {
+    "test": "mocha --exit",
+    "start": "nodemon src/app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "chai": "^6.2.2",
+    "chai-http": "^5.1.2",
+    "express": "^5.2.1",
+    "mocha": "^11.7.6"
+  },
+  "devDependencies": {}
+}
