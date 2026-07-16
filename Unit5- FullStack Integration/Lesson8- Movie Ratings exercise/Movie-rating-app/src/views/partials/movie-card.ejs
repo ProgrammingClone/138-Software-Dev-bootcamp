@@ -1,0 +1,17 @@
+<div class="col">
+  <div class="card h-100">
+    <a href="/movies/<%= movie._id %>">
+      <img src="<%= movie.posterUrl %>" alt="<%= movie.title %> poster" class="card-img-top" style="aspect-ratio: 2 / 3; object-fit: cover;" />
+    </a>
+    <div class="card-body">
+      <h2 class="h6 card-title mb-1">
+        <a href="/movies/<%= movie._id %>" class="text-decoration-none"><%= movie.title %></a>
+      </h2>
+      <p class="text-muted small mb-2"><%= movie.releaseYear %></p>
+      <form action="/movies/<%= movie._id %>/delete" method="POST"
+            onsubmit="return confirm('Delete this movie and all its reviews?');">
+        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+      </form>
+    </div>
+  </div>
+</div>

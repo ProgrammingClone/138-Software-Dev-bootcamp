@@ -5,7 +5,7 @@ import Review from '../models/Review.js';
 export async function getAllMovies(req, res) {
     try {
         const movies = await Movie.find().sort({createdAt: -1});
-        res.render("index",{movies})
+        res.render("index", {movies})
     } catch (error) {
         console.error(error)
     }
@@ -20,9 +20,7 @@ export async function getMovieById(req, res){
       return res.status(404).render("show", { movie: null, reviews: [], notFound: true });
     }
     const reviews = await Review.find({ movie: movie._id }).sort({ createdAt: -1 });
-    res.render("show", {movie, reviews, notfound:false})
-
-    const reviews = await Review.find({ movie: movie._id }).sort({ createdAt: -1 });
+    res.render("show", {movie, reviews, notFound:false})
     } catch (error) {
         console.error(error)
     }
@@ -35,7 +33,7 @@ export async function createMovie(req, res) {
     await Movie.create({ title, description, releaseYear, posterUrl });
     res.redirect("/movies");
   } catch (err) {
-    console.error(error)
+    console.error(err)
   }
 }
 
@@ -47,6 +45,6 @@ export async function deleteMovie(req, res) {
     await Review.deleteMany({ movie: id });
     res.redirect("/movies");
   } catch (err) {
-    console.error(error)
+    console.error(err)
   }
 }

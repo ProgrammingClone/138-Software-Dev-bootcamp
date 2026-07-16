@@ -1,0 +1,11 @@
+<div class="list-group-item">
+  <div class="d-flex justify-content-between align-items-center mb-1">
+    <strong><%= review.reviewerName %></strong>
+    <%- include('star-rating', { rating: review.rating }) %>
+  </div>
+  <p class="mb-2"><%= review.comment %></p>
+  <form action="/movies/<%= movieId %>/reviews/<%= review._id %>/delete" method="POST"
+        onsubmit="return confirm('Delete this review?');">
+    <button type="submit" class="btn btn-outline-danger btn-sm">Delete Review</button>
+  </form>
+</div>
