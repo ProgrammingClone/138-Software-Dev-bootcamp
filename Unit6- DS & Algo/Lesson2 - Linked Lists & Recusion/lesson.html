@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linked Lists, Dictionaries & Recursion — JavaScript</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #26313C;
+    --muted: #6B7684;
+    --paper: #FFFFFF;
+    --panel: #F6F7F8;
+    --line: #E4E7EA;
+    --accent: #4C6EF5;
+    --accent-soft: #EEF1FE;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter', system-ui, sans-serif;
+    line-height:1.65;
+    font-size:16px;
+  }
+  code, .mono{ font-family:'IBM Plex Mono', monospace; font-size:0.92em; }
+  .wrap{max-width:760px; margin:0 auto; padding:0 24px;}
+
+  header.top{
+    padding: 56px 0 36px;
+    border-bottom: 1px solid var(--line);
+  }
+  header.top .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px; letter-spacing:0.06em; text-transform:uppercase;
+    color: var(--muted);
+  }
+  header.top h1{
+    font-size: clamp(30px, 5vw, 40px);
+    margin: 10px 0 14px;
+    font-weight:700;
+  }
+  header.top p.sub{
+    font-size:16.5px;
+    color: var(--muted);
+    max-width:560px;
+    margin:0;
+  }
+
+  section{padding: 44px 0;}
+  section + section{border-top: 1px solid var(--line);}
+
+  .kicker{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px; text-transform:uppercase; letter-spacing:0.06em;
+    color: var(--accent);
+    margin:0 0 8px;
+  }
+  h2.title{
+    font-size: 23px;
+    margin:0 0 10px;
+    font-weight:700;
+  }
+  .lede{
+    font-size:16px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  p{margin: 0 0 14px;}
+
+  .note{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 20px 0;
+    font-size:15px;
+  }
+  .note .label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px; text-transform:uppercase; letter-spacing:0.06em;
+    color: var(--muted);
+    display:block; margin-bottom:6px;
+  }
+
+  .grid2{
+    display:grid; grid-template-columns: 1fr 1fr; gap: 28px;
+    align-items:center;
+  }
+  @media (max-width: 700px){ .grid2{grid-template-columns: 1fr;} }
+
+  svg{max-width:100%; height:auto; display:block;}
+
+  .box-list{
+    display:grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr));
+    gap:12px; margin-top:20px;
+  }
+  .box-item{
+    border:1px solid var(--line); border-radius:8px;
+    padding:14px 16px;
+  }
+  .box-item h4{margin:0 0 4px; font-size:14.5px; font-weight:600;}
+  .box-item p{margin:0; font-size:13.5px; color:var(--muted);}
+
+  table.op-table{
+    width:100%; border-collapse: collapse; margin-top:16px;
+    font-size:14.5px;
+  }
+  table.op-table th, table.op-table td{
+    text-align:left; padding:10px 14px; border-bottom:1px solid var(--line);
+  }
+  table.op-table th{
+    color: var(--muted);
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px;
+    text-transform:uppercase; letter-spacing:0.05em; font-weight:500;
+  }
+  table.op-table td code{
+    background: var(--panel); padding:2px 6px; border-radius:4px;
+  }
+
+  pre.code{
+    background: var(--panel); border:1px solid var(--line);
+    color: var(--ink); padding:14px 16px; border-radius:8px;
+    font-size:13.5px; overflow-x:auto; margin: 12px 0;
+  }
+
+  .recap{
+    background: var(--accent-soft);
+    border-radius: 8px; padding: 20px 22px; margin-top:28px;
+    font-size:14.5px;
+  }
+  .recap h3{margin-top:0; font-size:15.5px;}
+  .recap p{color: var(--ink); opacity:0.85; margin-bottom:0;}
+
+  footer{
+    text-align:center; padding: 28px 0; font-size:12.5px;
+    color: var(--muted);
+    font-family:'IBM Plex Mono', monospace;
+  }
+
+  .term-grid{
+    display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+    gap:12px; margin-top:20px;
+  }
+  .term-card{
+    border:1px solid var(--line); border-radius:8px;
+    padding:16px 18px;
+    background: var(--paper);
+  }
+  .term-card .term{
+    font-weight:700; font-size:15px; margin-bottom:6px;
+  }
+  .term-card p{margin:0; font-size:13.5px; color:var(--muted);}
+
+  .node{font-family:'IBM Plex Mono', monospace;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <span class="eyebrow">Lesson 2 — Data Structures & Algorithms in JavaScript</span>
+    <h1>Linked Lists, Dictionaries & Recursion</h1>
+    <p class="sub">Quick recap: last class we covered arrays — ordered, numbered lockers sitting next to each other in memory. Today we look at two more ways to organize data, plus a new way of thinking about solving problems.</p>
+  </div>
+</header>
+
+<section id="linkedlists">
+  <div class="wrap">
+    <p class="kicker">01 — Linked Lists</p>
+    <h2 class="title">What if the lockers aren't next to each other?</h2>
+    <p class="lede">An array keeps its items in one neat row in memory. A <strong>linked list</strong> doesn't. Its items can be scattered anywhere in memory — each one just holds a note telling you where to find the next one.</p>
+
+    <div class="note">
+      <span class="label">Think of it like...</span>
+      A treasure hunt. You don't get a map of every clue up front. You find clue 1, and it tells you where clue 2 is. Clue 2 tells you where clue 3 is. You can only get to a clue by following the trail from the start — you can't jump straight to clue 5.
+    </div>
+
+    <p>Each item in a linked list is called a <strong>node</strong>. A node has two parts:</p>
+    <div class="box-list">
+      <div class="box-item">
+        <h4>Value</h4>
+        <p>The actual data — a number, a name, whatever you're storing.</p>
+      </div>
+      <div class="box-item">
+        <h4>Next</h4>
+        <p>A pointer (an address) to where the next node lives in memory. The last node points to nothing.</p>
+      </div>
+    </div>
+
+    <svg viewBox="0 0 560 130" xmlns="http://www.w3.org/2000/svg">
+      <g class="node" font-size="13">
+        <!-- node 1 -->
+        <rect x="10" y="35" width="110" height="55" rx="6" fill="#F6F7F8" stroke="#C7CCD1"/>
+        <line x1="70" y1="35" x2="70" y2="90" stroke="#C7CCD1"/>
+        <text x="40" y="68" text-anchor="middle" fill="#26313C">"Amir"</text>
+        <text x="95" y="68" text-anchor="middle" fill="#6B7684" font-size="11">next</text>
+        <text x="65" y="22" text-anchor="middle" fill="#6B7684" font-size="11">node 1</text>
+
+        <!-- arrow -->
+        <line x1="120" y1="62" x2="165" y2="62" stroke="#4C6EF5" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+        <!-- node 2 -->
+        <rect x="170" y="35" width="110" height="55" rx="6" fill="#F6F7F8" stroke="#C7CCD1"/>
+        <line x1="230" y1="35" x2="230" y2="90" stroke="#C7CCD1"/>
+        <text x="200" y="68" text-anchor="middle" fill="#26313C">"Bella"</text>
+        <text x="255" y="68" text-anchor="middle" fill="#6B7684" font-size="11">next</text>
+        <text x="225" y="22" text-anchor="middle" fill="#6B7684" font-size="11">node 2</text>
+
+        <line x1="280" y1="62" x2="325" y2="62" stroke="#4C6EF5" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+        <!-- node 3 -->
+        <rect x="330" y="35" width="110" height="55" rx="6" fill="#F6F7F8" stroke="#C7CCD1"/>
+        <line x1="390" y1="35" x2="390" y2="90" stroke="#C7CCD1"/>
+        <text x="360" y="68" text-anchor="middle" fill="#26313C">"Cy"</text>
+        <text x="415" y="68" text-anchor="middle" fill="#6B7684" font-size="11">next</text>
+        <text x="385" y="22" text-anchor="middle" fill="#6B7684" font-size="11">node 3</text>
+
+        <line x1="440" y1="62" x2="480" y2="62" stroke="#4C6EF5" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <text x="510" y="67" fill="#B3B9BF" font-size="12">null</text>
+      </g>
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#4C6EF5"/>
+        </marker>
+      </defs>
+    </svg>
+
+    <h3 style="font-size:16.5px; margin-top:30px;">Arrays vs. linked lists</h3>
+    <p>Neither one is "better" — they're just good at different things. This trade-off is the whole point of today's lesson.</p>
+    <table class="op-table">
+      <tr><th>Task</th><th>Array</th><th>Linked list</th></tr>
+      <tr><td>Jump straight to item #50</td><td>Fast — just check that locker</td><td>Slow — must walk the chain from the start</td></tr>
+      <tr><td>Add/remove at the very front</td><td>Slow — every item shifts over</td><td>Fast — just rewire one pointer</td></tr>
+      <tr><td>Memory layout</td><td>One neat row, right next to each other</td><td>Scattered anywhere, linked by pointers</td></tr>
+    </table>
+
+    <div class="note">
+      <span class="label">In JavaScript</span>
+      There's no built-in <code>LinkedList</code> type — you build one yourself, usually as a small class for the node (<code>value</code> + <code>next</code>) and a class for the list itself that keeps track of the first node (the "head"). We'll build this together in class.
+    </div>
+  </div>
+</section>
+
+<section id="dictionaries">
+  <div class="wrap">
+    <p class="kicker">02 — Dictionaries & Hash Tables</p>
+    <h2 class="title">What if you looked things up by name, not by number?</h2>
+    <p class="lede">Arrays and linked lists find things using a position — index 0, index 1, and so on. A <strong>dictionary</strong> (also called a <strong>hash table</strong> or <strong>map</strong>) finds things using a <strong>key</strong> — usually a word — instead of a number.</p>
+
+    <div class="note">
+      <span class="label">Think of it like...</span>
+      Your phone's contacts app. You don't look up your friend by "contact #42." You look them up by name, and it instantly shows you their number. Name in, number out. That's a dictionary: a <strong>key</strong> (the name) mapped to a <strong>value</strong> (the number).
+    </div>
+
+    <svg viewBox="0 0 460 130" xmlns="http://www.w3.org/2000/svg">
+      <g class="node" font-size="13">
+        <rect x="10" y="10" width="130" height="34" rx="6" fill="#EEF1FE" stroke="#C9D2FB"/>
+        <text x="75" y="32" text-anchor="middle" fill="#26313C">"Amir"</text>
+        <rect x="10" y="52" width="130" height="34" rx="6" fill="#EEF1FE" stroke="#C9D2FB"/>
+        <text x="75" y="74" text-anchor="middle" fill="#26313C">"Bella"</text>
+        <rect x="10" y="94" width="130" height="34" rx="6" fill="#EEF1FE" stroke="#C9D2FB"/>
+        <text x="75" y="116" text-anchor="middle" fill="#26313C">"Cy"</text>
+        <text x="75" y="0" text-anchor="middle" fill="#6B7684" font-size="11">keys</text>
+
+        <line x1="140" y1="27" x2="185" y2="27" stroke="#4C6EF5" stroke-width="1.5" marker-end="url(#arrow2)"/>
+        <line x1="140" y1="69" x2="185" y2="69" stroke="#4C6EF5" stroke-width="1.5" marker-end="url(#arrow2)"/>
+        <line x1="140" y1="111" x2="185" y2="111" stroke="#4C6EF5" stroke-width="1.5" marker-end="url(#arrow2)"/>
+
+        <rect x="190" y="10" width="130" height="34" rx="6" fill="#F6F7F8" stroke="#C7CCD1"/>
+        <text x="255" y="32" text-anchor="middle" fill="#26313C">555-0134</text>
+        <rect x="190" y="52" width="130" height="34" rx="6" fill="#F6F7F8" stroke="#C7CCD1"/>
+        <text x="255" y="74" text-anchor="middle" fill="#26313C">555-0198</text>
+        <rect x="190" y="94" width="130" height="34" rx="6" fill="#F6F7F8" stroke="#C7CCD1"/>
+        <text x="255" y="116" text-anchor="middle" fill="#26313C">555-0177</text>
+        <text x="255" y="0" text-anchor="middle" fill="#6B7684" font-size="11">values</text>
+      </g>
+      <defs>
+        <marker id="arrow2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#4C6EF5"/>
+        </marker>
+      </defs>
+    </svg>
+
+    <h3 style="font-size:16.5px; margin-top:30px;">How does it find things so fast?</h3>
+    <p>Behind the scenes, a dictionary uses a <strong>hash function</strong> — a little formula that turns a key (like <code>"Amir"</code>) into a number. That number tells the computer exactly which memory slot to check, so it doesn't have to search item by item like it might with an array. This is why looking something up in a dictionary is close to instant (<code>O(1)</code>) even with millions of entries.</p>
+
+    <h3 style="font-size:16.5px; margin-top:30px;">Dictionaries in JavaScript</h3>
+    <p>JavaScript gives you two easy ways to build one:</p>
+    <pre class="code mono">// plain object — the simplest way
+const contacts = {
+  Amir: "555-0134",
+  Bella: "555-0198",
+  Cy: "555-0177"
+};
+contacts["Bella"]; // "555-0198"
+
+// Map — a built-in dictionary type, good when keys change a lot
+const contactsMap = new Map();
+contactsMap.set("Amir", "555-0134");
+contactsMap.get("Amir"); // "555-0134"</pre>
+
+    <table class="op-table">
+      <tr><th>Operation</th><th>What it means</th><th>JavaScript</th></tr>
+      <tr><td>Add / update</td><td>Store a value under a key</td><td><code>contacts["Dana"] = "555-0122"</code></td></tr>
+      <tr><td>Look up</td><td>Get the value for a key</td><td><code>contacts["Dana"]</code></td></tr>
+      <tr><td>Remove</td><td>Delete a key and its value</td><td><code>delete contacts["Dana"]</code></td></tr>
+      <tr><td>Check existence</td><td>See if a key exists</td><td><code>"Dana" in contacts</code></td></tr>
+    </table>
+
+    <div class="recap">
+      <h3>Array vs. linked list vs. dictionary</h3>
+      <p>Array: fast access by position, slow to insert at the front. Linked list: fast to insert/remove at the front, slow access by position. Dictionary: fast lookup by name/key instead of position at all. Same goal — organizing data — three different trade-offs.</p>
+    </div>
+  </div>
+</section>
+
+<section id="recursion">
+  <div class="wrap">
+    <p class="kicker">03 — Recursion</p>
+    <h2 class="title">What if a function could call itself?</h2>
+    <p class="lede">So far, every problem we've solved has used loops — repeat these steps until done. <strong>Recursion</strong> is a different way to repeat steps: a function that calls <em>itself</em>, with a smaller version of the same problem, until the problem becomes small enough to answer directly.</p>
+
+    <p>Every recursive function needs exactly two parts:</p>
+    <div class="box-list">
+      <div class="box-item">
+        <h4>Base case</h4>
+        <p>The "tiniest doll" — the simplest version of the problem, answered directly with no further calls. Without this, the function calls itself forever.</p>
+      </div>
+      <div class="box-item">
+        <h4>Recursive case</h4>
+        <p>The step where the function calls itself again, but with a smaller or simpler version of the problem, moving it closer to the base case.</p>
+      </div>
+    </div>
+
+    <svg viewBox="0 0 560 150" xmlns="http://www.w3.org/2000/svg">
+      <g class="node" font-size="12">
+        <rect x="10" y="10" width="110" height="34" rx="6" fill="#F6F7F8" stroke="#C7CCD1"/>
+        <text x="65" y="32" text-anchor="middle" fill="#26313C">factorial(4)</text>
+
+        <rect x="60" y="52" width="110" height="34" rx="6" fill="#F6F7F8" stroke="#C7CCD1"/>
+        <text x="115" y="74" text-anchor="middle" fill="#26313C">factorial(3)</text>
+
+        <rect x="110" y="94" width="110" height="34" rx="6" fill="#EEF1FE" stroke="#C9D2FB"/>
+        <text x="165" y="116" text-anchor="middle" fill="#26313C">factorial(2)</text>
+
+        <rect x="160" y="94" width="0" height="0"/>
+        <text x="290" y="74" fill="#6B7684" font-size="12">...continues until...</text>
+
+        <rect x="410" y="94" width="130" height="34" rx="6" fill="#EEF1FE" stroke="#4C6EF5"/>
+        <text x="475" y="116" text-anchor="middle" fill="#26313C" font-weight="700">factorial(1) → base case</text>
+
+        <line x1="65" y1="44" x2="115" y2="52" stroke="#C7CCD1"/>
+        <line x1="115" y1="86" x2="165" y2="94" stroke="#C7CCD1"/>
+      </g>
+    </svg>
+    <p style="font-size:13.5px; color:var(--muted); margin-top:8px;">Each call waits on a smaller call, until the base case answers directly — then the answers pass back up the chain.</p>
+
+    <h3 style="font-size:16.5px; margin-top:30px;">Why use recursion at all?</h3>
+    <p>Some problems are naturally defined in terms of smaller versions of themselves — walking a linked list, exploring a tree of folders, or breaking a big task into identical smaller tasks. For those problems, recursion often reads more clearly than a loop, once you're comfortable with it. It's a new way of thinking today — the code itself is something we'll build together in class.</p>
+
+  </div>
+</section>
+
+<footer>
+  DATA STRUCTURES & ALGORITHMS — LESSON 2
+</footer>
+
+</body>
+</html>

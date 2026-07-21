@@ -3,7 +3,8 @@
 // Unlike traditional arrays in languages like C or Java, JavaScript arrays are dynamic and can hold different data types.
 
 // Creating an Array
-let numbers = [10, 20, 30, 40, 50];
+let numbers = [10, 20, 30, 40, 50]; 
+console.log(typeof numbers);
 console.log("Array:", numbers);
 
 // Memory Representation:
