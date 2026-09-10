@@ -1,0 +1,161 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+}
+
+.navbar {
+  padding: 10px 20px;
+  background-color: #cfacac;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.navbar a {
+  color: white;
+  text-decoration: none;
+}
+
+/* React Router adds this class automatically to the NavLink matching
+   the current route. */
+.navbar a.active {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.navbar button {
+  background-color: #444;
+  border: none;
+  padding: 5px 10px;
+  color: white;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.home,
+.cart,
+.about,
+.not-found {
+  padding: 20px;
+}
+
+.home.light,
+.product-details.light {
+  background-color: white;
+  color: #222;
+}
+
+.home.dark,
+.product-details.dark {
+  background-color: #333;
+  color: white;
+}
+
+.product-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding: 20px;
+}
+
+.product-card {
+  background-color: white;
+  padding: 15px;
+  color: #222;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.product-card img {
+  max-width: 50%;
+  height: auto;
+  align-self: center;
+}
+
+.product-details {
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  max-width: 600px;
+  margin: 20px auto;
+}
+
+.product-details img {
+  max-width: 30%;
+  height: auto;
+}
+
+.cart-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.cart-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background-color: white;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.cart-item img {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
+.cart-item-info {
+  flex: 1;
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.quantity-controls button {
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+.remove-btn {
+  background-color: #b93a3a;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cart-summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-weight: bold;
+}
+
+.cart-summary button {
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.not-found {
+  text-align: center;
+}
