@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2020", // Output modern JavaScript
+    "module": "CommonJS", // Module format Node.js runs without extra setup
+    "lib": ["ES2020", "DOM"], // Built-in types. DOM provides `console`
+    "strict": true, // Turn on all strict type checks (keep this on!)
+    "esModuleInterop": true, // Allow default imports from CommonJS modules
+    "skipLibCheck": true, // Skip type-checking of library .d.ts files
+    "isolatedModules": true, // Each file must be compilable on its own
+    "outDir": "./" // Write the compiled .js next to each .ts file
+  },
+  "include": ["*.ts"], // Compile every .ts file in this folder
+  "exclude": ["node_modules"]
+}
