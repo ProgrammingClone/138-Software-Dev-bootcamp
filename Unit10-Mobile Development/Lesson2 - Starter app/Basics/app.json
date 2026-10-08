@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "starter",                // Display name of your app
+    "slug": "starter",                // URL-friendly identifier for Expo
+    "version": "1.0.0",               // App version
+    "orientation": "default",         // Screen orientation (default = both portrait/landscape)
+    "icon": "./assets/icon.png",      // App icon for devices
+    "userInterfaceStyle": "light",    // Default theme (light/dark)
+    "newArchEnabled": true,           // Enables new architecture (React Native Fabric + TurboModules)
+    "splash": {                       // App launch screen settings
+      "image": "./assets/splash-icon.png", 
+      "resizeMode": "contain",        // How the image scales
+      "backgroundColor": "#ffffff"    // Splash screen background color
+    },
+    "ios": {
+      "supportsTablet": true          // Allow iPad support
+    },
+    "android": {
+      "adaptiveIcon": {               // Android adaptive icon settings
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true       // Enable edge-to-edge display (status/navigation bars)
+    },
+    "web": {
+      "favicon": "./assets/favicon.png" // Favicon for web apps
+    }
+  }
+}
