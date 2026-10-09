@@ -7,7 +7,6 @@ import ProfileScreen from "./screens/ProfileScreen";
 
 export default function App() {
   return (
-    <>
       <SafeAreaProvider>
         <SafeAreaView style={styles.container}>
           {/* Automatically adjust status bar color based on background */}
@@ -17,7 +16,6 @@ export default function App() {
           {/* <ProfileScreen /> */}
         </SafeAreaView>
       </SafeAreaProvider>
-    </>
   );
 }
 
@@ -25,7 +23,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",
-    paddingTop: Platform.OS === "android" ? 25 : 0,
   },
 });
 

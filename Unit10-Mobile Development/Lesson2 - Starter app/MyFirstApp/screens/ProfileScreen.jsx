@@ -32,7 +32,7 @@ export default function ProfileScreen() {
 
       <Text style={styles.heading}>Profile</Text>
 
-      <Image source={require('../assets/adaptive-icon.png')} style={styles.avatar} />
+      <Image source={require('../assets/icon.png')} style={styles.avatar} />
 
       <TextInput
         style={styles.input}

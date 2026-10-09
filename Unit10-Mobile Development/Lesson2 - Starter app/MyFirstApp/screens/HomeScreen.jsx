@@ -8,11 +8,11 @@ export default function HomeScreen() {
     return (
         <View style={styles.container}>
             {/* Logo Image */}
-            <Image source={require('../assets/adaptive-icon.png')} style={styles.logo} />
+            <Image source={require('../assets/icon.png')} style={styles.logo} />
             {/* Main Heading */}
             <Text style={styles.title}>Hello, Expo!</Text>
             {/* Counter Display */}
-            <Text style={styles.count}>Count: {count}</Text>∆
+            <Text style={styles.count}>Count: {count}</Text>
             {/* Buttons for Counter */}
             <Button title="Increment" onPress={increment} disabled={count >=10}/>
             <Button title="Decrement" onPress={decrement} disabled={count <= 0}/>
